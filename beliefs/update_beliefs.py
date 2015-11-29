@@ -41,7 +41,11 @@ exchange_rate_beliefs_std = all_exchange_rate_df.groupby(
     ['foreign', 'month'])['rate'].std().reorder_levels(
     [1, 0]).reset_index()
 
-raw_price_beliefs_mean.to_csv('raw_price_beliefs_mean.csv')
-raw_price_beliefs_std.to_csv('raw_price_beliefs_std.csv')
-exchange_rate_beliefs_mean.to_csv('exchange_rate_beliefs_mean.csv')
-exchange_rate_beliefs_std.to_csv('exchange_rate_beliefs_std.csv')
+raw_price_beliefs_mean.to_csv('raw_price_beliefs_mean.csv',
+    index=False)
+raw_price_beliefs_std.to_csv('raw_price_beliefs_std.csv',
+    index=False)
+exchange_rate_beliefs_mean.to_csv('exchange_rate_beliefs_mean.csv',
+    index=False)
+exchange_rate_beliefs_std.to_csv('exchange_rate_beliefs_std.csv',
+    index=False)
