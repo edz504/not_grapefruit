@@ -9,6 +9,8 @@ groves = []
 storages = []
 processing_plants = []
 deliveries = []
+
+# Store decisions as dictionary
 decisions = {}
 
 sales = [None] * 48

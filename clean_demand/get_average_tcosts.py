@@ -2,7 +2,8 @@ from xlwings import Workbook, Range
 import numpy as np
 import pandas as pd
 
-wb = Workbook('/Users/edz/Documents/Princeton/Senior/ORF411/OJ/Analysis/StaticData-mod.xlsx')
+ROOT_DIR = os.path.dirname(os.getcwd())
+wb = Workbook(os.path.join(ROOT_DIR, 'reference/StaticData-mod.xlsx'))
 
 # Storage and Markets
 storages = Range('S->M', 'C1:BU1').value

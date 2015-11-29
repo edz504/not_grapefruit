@@ -3,7 +3,8 @@ import numpy as np
 import pandas as pd
 import os
 
-wb = Workbook(os.path.join(os.getcwd(), 'StaticData-mod.xlsx'))
+ROOT_DIR = os.path.dirname(os.getcwd())
+wb = Workbook(os.path.join(ROOT_DIR, 'reference/StaticData-mod.xlsx'))
 
 # Storage and Markets
 storages = Range('S->M', 'C1:BU1').value

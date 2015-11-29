@@ -43,6 +43,9 @@ ora.df$weekly_transp_cost <- ora.df$weekly_demand *
 ora.df$weekly_storage_build <- 6000 * ora.df$weekly_demand / 48
 ora.df$weekly_storage_maint <- (4 * 7500000 + 650 * ora.df$weekly_demand) / 48
 
+# Finally, include the raw material cost (spot purchase of ORA).
+# 
+
 # Note: this "profit" is for the first year, actual profit
 # should be even higher in later years when we don't have the
 # capacity cost.
