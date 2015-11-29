@@ -7,7 +7,7 @@ ROOT_DIR = os.path.dirname(os.getcwd())
 
 # Practice round 1 (get all ORA demand)
 wb = Workbook(os.path.join(ROOT_DIR,
-              'Results/notgrapefruit2015 - Practice 1.xlsm'))
+              'results/notgrapefruit2015 - Practice 1.xlsm'))
 price_over_month = np.linspace(1, 4, 12)
 months = ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar',
           'Apr', 'May', 'Jun', 'Jul', 'Aug']
@@ -27,7 +27,7 @@ ORA_demand.to_csv('ora_demand.csv', index=False)
 
 # Practice round 2 (try to get demand for POJ, ROJ, FCOJ)
 wb = Workbook(os.path.join(ROOT_DIR,
-              'Results/notgrapefruit2015 - Practice 2.xlsm'))
+              'results/notgrapefruit2015 - Practice 2.xlsm'))
 price_over_month = np.linspace(4, 1, 12)
 
 ## POJ
