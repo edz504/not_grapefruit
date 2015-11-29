@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import os
 
-def write_prices(year):
+def write_spot_purchase_prices(year):
     ROOT_DIR = os.path.dirname(os.getcwd())
     wb = Workbook(os.path.join(ROOT_DIR,
         'results/notgrapefruit{0}.xlsm'.format(year)))
@@ -17,7 +17,4 @@ def write_prices(year):
     exchange_rate_df.columns = Range('grove', 'C13:N13').value
     exchange_rate_df.index = Range('grove', 'B14:B15').value
 
-    raw_price_df.to_csv('raw_prices_{0}.csv'.format(year))
-    exchange_rate_df.to_csv('exchange_rates_{0}.csv'.format(year))
-
-write_prices(2015)
+    return (raw_price_df, exchange_rate_df)
