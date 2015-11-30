@@ -1,6 +1,9 @@
 library(ggplot2)
 library(dplyr)
 
+##### The revenue calculation is wrong -- it's multiplying by 
+##### sales instead of weekly sales (month / 4)
+
 # ORA
 ora.df <- read.csv('ora_demand.csv')
 ora.df <- ora.df %>%

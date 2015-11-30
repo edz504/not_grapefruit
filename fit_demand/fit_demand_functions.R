@@ -18,6 +18,7 @@ colnames(coef.fit.df) <- c('intercept', 'c1', 'region', 'product')
 
 x <- 1
 i <- 1
+total.SSE <- 0
 for (df in list(ora, poj, roj, fcoj)) {
     j <- 1
     for (region in regions) {
@@ -34,11 +35,14 @@ for (df in list(ora, poj, roj, fcoj)) {
             'demand_curves/fitted_demand_', regions[j], '_',
             products[i], '.png', sep=''),
                width=10, height=6)
+        total.SSE <- total.SSE +
+            sum((fit.df$pred - fit.df$weekly.demand)^2)
         j <- j + 1
         x <- x + 1
     }
     i <- i + 1
 }
+total.SSE
 
 write.csv(coef.fit.df, 'demand_fit_coefs.csv',
           quote=FALSE, row.names=FALSE)

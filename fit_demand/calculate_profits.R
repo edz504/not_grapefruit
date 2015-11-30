@@ -10,12 +10,6 @@ ora.df <- ora.df %>%
     mutate(revenue=2000 * price * predicted_demand,
            weekly_demand = predicted_demand)
 
-# We want to maximize profit, not revenue.
-# Calculate transportation costs for each price + region.
-# Each region has a mean distance for its markets to the closest
-# storage.  Let's also assume that for grove to storage, we'll
-# ship spot purchases from CAL to S59, TEX to S35, FLA to S51,
-# FLA to S73.
 s35.grove.dist <- 266
 s51.grove.dist <- 967
 s59.grove.dist <- 176
@@ -43,7 +37,7 @@ ora.df$weekly_transp_cost <- ora.df$weekly_demand *
 ora.df$weekly_storage_build <- 6000 * ora.df$weekly_demand / 48
 ora.df$weekly_storage_maint <- (650 * ora.df$weekly_demand) / 48
 # ^ Note that we do not account for the 7.5m * 4 because it will
-# be present at every price.
+# be present at every price (add in at end).
 
 # Finally, include the raw material cost (spot purchase of ORA).
 # We use our mean belief for each grove's spot purchase price.
@@ -72,12 +66,16 @@ ora.df$raw_material_cost <- ora.df$weekly_demand * 2000 * c(
 # Note: this "profit" is for the first year, actual profit
 # should be even higher in later years when we don't have the
 # capacity cost.
-ora.df$profit <- ora.df$revenue - (ora.df$weekly_transp_cost +
+ora.df$year1_profit <- ora.df$revenue - (ora.df$weekly_transp_cost +
     ora.df$weekly_storage_build + ora.df$weekly_storage_maint +
     ora.df$raw_material_cost)
-ggplot(ora.df, aes(x=price, y=profit, colour=region)) +
-    geom_line() +
-    ggtitle('ORA Profit')
+ora.df$profit <- ora.df$revenue - (ora.df$weekly_transp_cost +
+    ora.df$weekly_storage_maint +
+    ora.df$raw_material_cost)
+ggplot(ora.df, aes(x=price, colour=region)) +
+    geom_line(aes(y=year1_profit), linetype='dotted') +
+    geom_line(aes(y=profit)) +
+    ggtitle('ORA Profit (Year 1 and After)')
 ggsave('profit_curves/ora_profit.png', width=10, height=6)
 
 ora.profit.max <- ora.df %>% group_by(region) %>%
@@ -161,7 +159,7 @@ poj.df$raw_material_cost <- poj.df$weekly_demand * 2000 * c(
         2 * 301))
 
 
-poj.df$profit <- poj.df$revenue - (poj.df$tanker_car_weekly_purchase_cost +
+poj.df$year1_profit <- poj.df$revenue - (poj.df$tanker_car_weekly_purchase_cost +
     poj.df$tanker_car_weekly_travel_cost +
     poj.df$g_p_weekly_cost + poj.df$storage_market_weekly_cost +
     poj.df$manufacturing_cost +
@@ -170,9 +168,12 @@ poj.df$profit <- poj.df$revenue - (poj.df$tanker_car_weekly_purchase_cost +
     poj.df$raw_material_cost +
     poj.df$weekly_storage_build +
     poj.df$weekly_storage_maint)
-ggplot(poj.df, aes(x=price, y=profit, colour=region)) +
-    geom_line() +
-    ggtitle('POJ Profit')
+poj.df$profit <- poj.df$year1_profit +
+    (poj.df$weekly_proc_build + poj.df$weekly_storage_build)
+ggplot(poj.df, aes(x=price, colour=region)) +
+    geom_line(aes(y=year1_profit), linetype='dotted') +
+    geom_line(aes(y=profit)) +
+    ggtitle('POJ Profit (Year 1 and After)')
 ggsave('profit_curves/poj_profit.png', width=10, height=6)
 
 poj.profit.max <- poj.df %>% group_by(region) %>%
@@ -253,7 +254,7 @@ roj.df$raw_material_cost <- roj.df$weekly_demand * 2000 * c(
 # FCOJ to get ROJ (assume no futures).
 roj.df$manufacturing_cost <- 2000 * roj.df$weekly_demand
 
-roj.df$profit <- roj.df$revenue - (roj.df$tanker_car_weekly_purchase_cost +
+roj.df$year1_profit <- roj.df$revenue - (roj.df$tanker_car_weekly_purchase_cost +
     roj.df$tanker_car_weekly_travel_cost +
     roj.df$g_p_weekly_cost + roj.df$storage_market_weekly_cost +
     roj.df$reconstitution_cost +
@@ -261,9 +262,11 @@ roj.df$profit <- roj.df$revenue - (roj.df$tanker_car_weekly_purchase_cost +
     roj.df$weekly_storage_maint +
     roj.df$raw_material_cost +
     roj.df$manufacturing_cost)
+roj.df$profit <- roj.df$year1_profit + roj.df$weekly_storage_build
 ggplot(roj.df, aes(x=price, y=profit, colour=region)) +
-    geom_line() +
-    ggtitle('ROJ Profit')
+    geom_line(aes(y=year1_profit), linetype='dotted') +
+    geom_line(aes(y=profit)) +
+    ggtitle('ROJ Profit (Year 1 and After)')
 ggsave('profit_curves/roj_profit.png', width=10, height=6)
 
 roj.profit.max <- roj.df %>% group_by(region) %>%
@@ -342,7 +345,7 @@ fcoj.df$raw_material_cost <- fcoj.df$weekly_demand * 2000 * c(
     rep(mean.over.months[mean.over.months$grove == 'CAL', ]$mean_month,
         2 * 301))
 
-fcoj.df$profit <- fcoj.df$revenue - (fcoj.df$tanker_car_weekly_purchase_cost +
+fcoj.df$year1_profit <- fcoj.df$revenue - (fcoj.df$tanker_car_weekly_purchase_cost +
     fcoj.df$tanker_car_weekly_travel_cost +
     fcoj.df$g_p_weekly_cost + fcoj.df$storage_market_weekly_cost +
     fcoj.df$manufacturing_cost +
@@ -351,12 +354,28 @@ fcoj.df$profit <- fcoj.df$revenue - (fcoj.df$tanker_car_weekly_purchase_cost +
     fcoj.df$raw_material_cost +
     fcoj.df$weekly_storage_build +
     fcoj.df$weekly_storage_maint)
+fcoj.df$profit <- fcoj.df$year1_profit + fcoj.df$weekly_proc_build +
+    fcoj.df$weekly_storage_build
 ggplot(fcoj.df, aes(x=price, y=profit, colour=region)) +
-    geom_line() +
-    ggtitle('FCOJ Profit')
+    geom_line(aes(y=year1_profit), linetype='dotted') +
+    geom_line(aes(y=profit)) +
+    ggtitle('FCOJ Profit (Year 1 and After)')
 ggsave('profit_curves/fcoj_profit.png', width=10, height=6)
 
 fcoj.profit.max <- fcoj.df %>% group_by(region) %>%
     filter(profit == max(profit))
 write.csv(fcoj.profit.max, file='profit_csvs/fcoj_max_profit.csv',
           quote=FALSE, row.names=FALSE)
+
+
+# Total profit, using FCOJ futures
+for (fcoj_future_price in seq(0.6, 1.1, 0.1)) {
+    profit <- 48 * (sum(ora.profit.max$profit) + sum(poj.profit.max$profit) +
+        sum(roj.profit.max$profit)) +
+        (6112246 * 48 - fcoj_future_price * 136000 * 2000) -
+        (4 * 7500000 + 4 * 8000000)
+    print(profit)
+}
+
+sum(ora.profit.max$weekly_demand) + sum(poj.profit.max$weekly_demand) +
+    sum(roj.profit.max$weekly_demand)

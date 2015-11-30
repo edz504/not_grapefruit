@@ -44,7 +44,7 @@ opt <- fcoj.demands %>%
                    predicted_demand, weekly_revenue,
                    profit)
 
-print 'Profit - purchase cost'
+print('Profit - purchase cost')
 sum(opt$profit) - (1.12847 * 136000 * 2000 / 48)
 
 # The above needs to be constrained by our demands, which

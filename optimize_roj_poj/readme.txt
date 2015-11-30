@@ -15,19 +15,12 @@ where R and P are the amounts of ROJ and POJ manufactured, respectively.  We als
 Results
 =====
 For P02 (region DS), objective maximization is at
-R = 325 ($/lb = 1.83057439667), P = 530 ($/lb = 2.07471744157)
+R = 293 ($/lb = 1.71149262229), P = 562 ($/lb = 1.92597962063)
 For P09 (region MW), objective maximization is at
-R = 388 ($/lb = 1.98469158548), P = 257 ($/lb = 2.61543448601)
+R = 329 ($/lb = 1.97153817161), P = 316 ($/lb = 2.36047760922)
 For P05 (regions SW, NW), objective maximization is at
-R = 504 ($/lb = 1.85885885886), P = 381 ($/lb = 2.12312312312)
->>> For P02 (region DS), objective maximization is at
-R = 325 ($/lb = 1.83057439667), P = 530 ($/lb = 2.07471744157)
-For P09 (region MW), objective maximization is at
-R = 388 ($/lb = 1.98469158548), P = 257 ($/lb = 2.61543448601)
-For P05 (regions SW, NW), objective maximization is at
-R = 504 ($/lb = 1.85885885886), P = 381 ($/lb = 2.12312312312)
+R = 546 ($/lb = 1.5975975976), P = 339 ($/lb = 2.07507507508)
 For P03 (regions NE, MA, SE), objective maximization is at
-R = 1821 ($/lb = 1.91291291291), P = 909 ($/lb = 2.43543543544)
-
+R = 1490 ($/lb = 1.78978978979), P = 1240 ($/lb = 2.11711711712)
 
 Note that due to the method by which we aggregated demand over multiple regions (for a given storage system / processing plant), we don't have true price differentiation among those regions.
