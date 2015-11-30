@@ -18,9 +18,11 @@ for (i in 1:nrow(demands.df)) {
         x <- x + 1
     }
 }
-
 demand.curves.df$region <- factor(demand.curves.df$region)
 demand.curves.df$product <- factor(demand.curves.df$product)
+write.csv(demand.curves.df, file='all_predicted_demands.csv',
+          quote=FALSE, row.names=FALSE)
+
 
 ggplot(demand.curves.df, aes(x=price, y=predicted_demand)) +
     geom_line(aes(colour=region)) + facet_wrap(~ product, ncol=2) +

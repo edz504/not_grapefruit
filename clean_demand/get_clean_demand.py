@@ -50,16 +50,15 @@ POJ_demand_mat = np.copy(POJ_sales)
 # should be doubled to approximate $4 (Sept.) demand.
 POJ_demand_mat[:, 0] = POJ_demand_mat[:, 0] * 2
 
-# Last 2 months are completely censored for all regions.
-POJ_demand_mat[:, 10:12] = 0
-
-# 3rd to last month is half-censored for S15 and fully censored for
-# S61.  S61 has NE, MA, SE, and most of MW.  S15 has DS, NW, SW, and
-# some of MW.  We zero out the demand for the corresponding S61 regions
-# and double the sales for the S15 regions to obtain their estimates
-# (let's just assume MW is all S61).
-POJ_demand_mat[0:4, 9] = 0
-POJ_demand_mat[4:8, 9] = POJ_demand_mat[4:8, 9] * 2
+# The last 2 months are completely censored.  The third to last month
+# for S61 regions is also completely, censored, and the third to last
+# month for S15 regions has half of the demand censored.  Due
+# to the way regions are broken down, though, we can't use this data
+# at all.  We were multiplying the sales proportionally, but that
+# only makes sense when we see 0 sales in some weeks.  If we see
+# some censored sales and still multiply, we end up with an
+# overestimation of the demand.
+POJ_demand_mat[:, 9:12] = 0
 
 POJ_demand = pd.DataFrame(
         {'price': list(price_over_month) * 7,
@@ -87,18 +86,10 @@ ROJ_sales = np.array(Range('ROJ', 'D109:O115', atleast_2d=True).value)
 ROJ_demand_mat = np.copy(ROJ_sales)
 
 # First 3 weeks had no available ROJ for all regions, so sales in month 1
-# should be doubled to approximate $4 (Sept.) demand.
+# should be quadrupled to approximate $4 (Sept.) demand.
 ROJ_demand_mat[:, 0] = ROJ_demand_mat[:, 0] * 4
-
-# Last 2 months are completely censored for all regions.
-ROJ_demand_mat[:, 10:12] = 0
-
-# 3rd to last month is half-censored for S15 and S61.
-# S61.  S61 has NE, MA, SE, and most of MW.  S15 has DS, NW, SW, and
-# some of MW.  We zero out the demand for the corresponding S61 regions
-# and double the sales for the S15 regions to obtain their estimates
-# (let's just assume MW is all S61).
-ROJ_demand_mat[:, 9] = ROJ_demand_mat[:, 9] * 2
+# Last 3 months have at least some censoring
+ROJ_demand_mat[:, 9:12] = 0
 
 ROJ_demand = pd.DataFrame(
         {'price': list(price_over_month) * 7,
@@ -125,22 +116,12 @@ censor_df = pd.DataFrame({'S15_censored': s15_is_censored,
 FCOJ_sales = np.array(Range('FCOJ', 'D109:O115', atleast_2d=True).value)
 FCOJ_demand_mat = np.copy(FCOJ_sales)
 
-# First 3 weeks had no available ROJ for all regions, so sales in month 1
-# should be doubled to approximate $4 (Sept.) demand.
-FCOJ_demand_mat[:, 0] = FCOJ_demand_mat[:, 0] * 4
-
-# Last 3 months are completely censored for all regions.
-FCOJ_demand_mat[:, 9:12] = 0
-
-# 3rd to last month is half-censored for S15 and S61.
-# S61.  S61 has NE, MA, SE, and most of MW.  S15 has DS, NW, SW, and
-# some of MW.  We zero out the demand for the corresponding S61 regions
-# and double the sales for the S15 regions to obtain their estimates
-# (let's just assume MW is all S61).
-FCOJ_demand_mat[0:4, 8] = FCOJ_demand_mat[0:4, 8] * 2
-FCOJ_demand_mat[4:8, 8] = FCOJ_demand_mat[4:8, 8] * 4 / 3
-
-FCOJ_demand_mat[4:8, 7] = FCOJ_demand_mat[4:8, 7] * 2
+FCOJ_demand_mat[:, 0] = FCOJ_demand_mat[:, 0] * 2
+# Last 4 months have some bit of censoring
+# 5th month also has some censoring for S15, but S61 regions
+# have full 5th month.
+FCOJ_demand_mat[:, 8:12] = 0
+FCOJ_demand_mat[4:8, 7] = 0
 
 FCOJ_demand = pd.DataFrame(
         {'price': list(price_over_month) * 7,

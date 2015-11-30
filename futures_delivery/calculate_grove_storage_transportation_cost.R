@@ -1,13 +1,19 @@
 setwd('..')
 fcoj.demands.at.profit.max <- read.csv(
+    'fit_demand/profit_csvs/fcoj_max_profit.csv')
+fcoj.demands.realized.max <- read.csv(
     'clean_demand/fcoj_max_profit_opt.csv')
+all.demands <- read.csv('fit_demand/all_predicted_demands.csv',
+    stringsAsFactors=FALSE)
+fcoj.demands <- all.demands[all.demands$product == 'FCOJ', ]
 
-s35.weekly.demand <- fcoj.demands.at.profit.max$weekly_demand[5]
+
+s35.weekly.demand <- fcoj.demands.realized.max$weekly_demand[5]
 s51.weekly.demand <- sum(
-    fcoj.demands.at.profit.max$weekly_demand[c(1, 2, 3)])
+    fcoj.demands.realized.max$weekly_demand[c(1, 2, 3)])
 s59.weekly.demand <- sum(
-    fcoj.demands.at.profit.max$weekly_demand[c(6, 7)])
-s73.weekly.demand <- fcoj.demands.at.profit.max$weekly_demand[4]
+    fcoj.demands.realized.max$weekly_demand[c(6, 7)])
+s73.weekly.demand <- fcoj.demands.realized.max$weekly_demand[4]
 
 fla.to.s35 <- 1522
 fla.to.s51 <- 967
@@ -20,12 +26,12 @@ print('Weekly grove->storage cost: ')
         s59.weekly.demand * fla.to.s59 +
         s73.weekly.demand * fla.to.s73)
 print('Weekly revenue: ')
-sum(fcoj.demands.at.profit.max$price *
-    fcoj.demands.at.profit.max$weekly_demand * 2000)
+sum(fcoj.demands.realized.max$price *
+    fcoj.demands.realized.max$weekly_demand * 2000)
 
 # read in the average distance to closest storage for each region
 closest.storage.dists <- read.csv(
-    'clean_demand/region_storage_dists_opt.csv')
+    'fit_demand/region_storage_dists_opt.csv')
 print('Weekly storage->market cost: ')
 1.2 * (s35.weekly.demand * closest.storage.dists$d[1] +
        s51.weekly.demand * sum(closest.storage.dists$d[c(2, 4, 6)]) +
@@ -46,11 +52,16 @@ print('Annual storage->market cost: ')
        s73.weekly.demand * sum(closest.storage.dists$d[3])) * 48
 
 print('Annual revenue: ')
-sum(fcoj.demands.at.profit.max$price *
-    fcoj.demands.at.profit.max$weekly_demand * 2000) * 48
-
-
+sum(fcoj.demands.realized.max$price *
+    fcoj.demands.realized.max$weekly_demand * 2000) * 48
 # The above shows that we lose about $15m :(
+
+514728558 - (177717586 + 44496951 + (1.12847 * 136000 * 2000))
+514728558 - (177717586 + 44496951 + (1.042842909 * 136000 * 2000))
+514728558 - (177717586 + 44496951 + (1.003282899 * 136000 * 2000))
+514728558 - (177717586 + 44496951 + (0.95103434 * 136000 * 2000))
+514728558 - (177717586 + 44496951 + (0.918032097 * 136000 * 2000))
+
 
 
 ############# disregard
