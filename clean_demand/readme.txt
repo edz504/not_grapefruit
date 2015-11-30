@@ -1,0 +1,3 @@
+The code here takes the sales results from the practice rounds and estimates demands.  Censored demand is left as zero, and partially-censored (e.g. 2 weeks out of 4) is projected to a 4-week scale.  There are also various other scripts that attempt to calculate profit as a function of projected sales and costs (manufacturing, storage, transportation, etc.), and then maximize.
+
+For a cleaner look at demand, see the fit_demand folder.  There is code there that extracts the raw demands here and fits a function to each region's demand for each product as a function of price.

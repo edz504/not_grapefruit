@@ -4,7 +4,7 @@ import os
 
 ROOT_DIR = os.path.dirname(os.getcwd())
 df = pd.read_csv(os.path.join(ROOT_DIR,
-    'clean_demand/demand_fit_coefs.csv'))
+    'fit_demand/demand_fit_coefs.csv'))
 
 # P2 (DS)
 # R + P = 855

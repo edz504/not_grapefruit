@@ -1,0 +1,1 @@
+This folder contains the code used to find the optimal set of storages and processing plants.  It first minimizes the storage->market distance for a growing set size S, and then fixes those storages and minimizes plant->storage distance.

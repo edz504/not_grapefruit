@@ -2,7 +2,7 @@ library(dplyr)
 library(ggplot2)
 library(reshape2)
 
-# ORA is inflated
+# Note: ORA is inflated
 ora <- read.csv('ora_demand_opt.csv')
 poj <- read.csv('poj_demand_opt.csv')
 roj <- read.csv('roj_demand_opt.csv')
