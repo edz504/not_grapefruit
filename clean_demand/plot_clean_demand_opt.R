@@ -43,11 +43,38 @@ ora.df$weekly_transp_cost <- ora.df$weekly_demand *
 ora.df$weekly_storage_build <- 6000 * ora.df$weekly_demand / 48
 ora.df$weekly_storage_maint <- (4 * 7500000 + 650 * ora.df$weekly_demand) / 48
 
+# Finally, include the raw material cost (spot purchase of ORA).
+# We use our mean belief for each grove's spot purchase price.
+# (FLA x 36, FLA x 12, TEX x 12, CAL x 24) is the vectoring.
+# Average over months for now, disregarding seasonality -- also,
+# no need to factor in exchange rates for now, assume we buy from
+# FLA, not FLA / BRA / SPA.
+
+cwd <- getwd()
+setwd('..') # move up one directory
+mean.raw.price.beliefs <- read.csv(
+    'beliefs/raw_price_beliefs_mean.csv')
+setwd(cwd)
+
+mean.over.months <- mean.raw.price.beliefs %>%
+    group_by(grove) %>%
+    summarise(mean_month=mean(price))
+ora.df$raw_material_cost <- ora.df$weekly_demand * 2000 * c(
+    rep(mean.over.months[mean.over.months$grove == 'FLA', ]$mean_month,
+        48),
+    rep(mean.over.months[mean.over.months$grove == 'TEX', ]$mean_month,
+        12),
+    rep(mean.over.months[mean.over.months$grove == 'CAL', ]$mean_month,
+        24))
+
 # Note: this "profit" is for the first year, actual profit
 # should be even higher in later years when we don't have the
 # capacity cost.
 ora.df$profit <- ora.df$revenue - (ora.df$weekly_transp_cost +
-    ora.df$weekly_storage_build + ora.df$weekly_storage_maint)
+    ora.df$weekly_storage_build + ora.df$weekly_storage_maint +
+    ora.df$raw_material_cost)
+write.csv(ora.df, file='ora_demand_opt.csv',
+          quote=FALSE, row.names=FALSE)
 ggplot(ora.df, aes(x=price, y=profit, colour=region)) +
     geom_point() + geom_line() +
     ggtitle('ORA Profit (Revenue - Trans. Costs)')
@@ -96,7 +123,6 @@ poj.df$g_p_dist <- c(rep(773, 36),
 # P3 -> S51 = 317
 # P5 -> S59 = 393
 # P9 -> S73 = 98
-
 poj.df$p_s_dist <- c(rep(317, 36),
                      rep(98, 12),
                      rep(140, 12),
@@ -124,12 +150,25 @@ poj.df$weekly_proc_maint <- (4 * 8000000 + 2500 * poj.df$weekly_demand) / 48
 
 poj.df$manufacturing_cost <- 2000 * poj.df$weekly_demand
 
+# Add in raw material cost
+poj.df$raw_material_cost <- poj.df$weekly_demand * 2000 * c(
+    rep(mean.over.months[mean.over.months$grove == 'FLA', ]$mean_month,
+        48),
+    rep(mean.over.months[mean.over.months$grove == 'TEX', ]$mean_month,
+        12),
+    rep(mean.over.months[mean.over.months$grove == 'CAL', ]$mean_month,
+        24))
+
+
 poj.df$profit <- poj.df$revenue - (poj.df$tanker_car_weekly_purchase_cost +
     poj.df$tanker_car_weekly_travel_cost +
     poj.df$g_p_weekly_cost + poj.df$storage_market_weekly_cost +
     poj.df$manufacturing_cost +
     poj.df$weekly_proc_build +
-    poj.df$weekly_proc_maint)
+    poj.df$weekly_proc_maint +
+    poj.df$raw_material_cost)
+write.csv(poj.df, file='poj_demand_opt.csv',
+          quote=FALSE, row.names=FALSE)
 ggplot(poj.df, aes(x=price, y=profit, colour=region)) +
     geom_point() + geom_line() +
     ggtitle('POJ Profit (Revenue - Trans. - Man. Costs)')
@@ -204,14 +243,32 @@ roj.df$storage_market_weekly_cost <- 1.2 * roj.df$weekly_demand *
 roj.df$weekly_proc_build <- 8000 * roj.df$weekly_demand / 48
 roj.df$weekly_proc_maint <- (4 * 8000000 + 2500 * roj.df$weekly_demand) / 48
 
+# Reconstitution cost
 roj.df$reconstitution_cost <- 650 * roj.df$weekly_demand
+
+# Add in raw material cost
+roj.df$raw_material_cost <- roj.df$weekly_demand * 2000 * c(
+    rep(mean.over.months[mean.over.months$grove == 'FLA', ]$mean_month,
+        48),
+    rep(mean.over.months[mean.over.months$grove == 'TEX', ]$mean_month,
+        12),
+    rep(mean.over.months[mean.over.months$grove == 'CAL', ]$mean_month,
+        24))
+
+# Also, add in manufacturing cost of FCOJ because we need to make
+# FCOJ to get ROJ (assume no futures).
+roj.df$manufacturing_cost <- 2000 * roj.df$weekly_demand
 
 roj.df$profit <- roj.df$revenue - (roj.df$tanker_car_weekly_purchase_cost +
     roj.df$tanker_car_weekly_travel_cost +
     roj.df$g_p_weekly_cost + roj.df$storage_market_weekly_cost +
     roj.df$reconstitution_cost +
     roj.df$weekly_proc_build +
-    roj.df$weekly_proc_maint)
+    roj.df$weekly_proc_maint +
+    roj.df$raw_material_cost +
+    roj.df$manufacturing_cost)
+write.csv(roj.df, file='roj_demand_opt.csv',
+          quote=FALSE, row.names=FALSE)
 ggplot(roj.df, aes(x=price, y=profit, colour=region)) +
     geom_point() + geom_line() +
     ggtitle('ROJ Profit (Revenue - Trans. - Man. Costs)')
@@ -285,12 +342,23 @@ fcoj.df$weekly_proc_maint <- (4 * 8000000 + 2500 * fcoj.df$weekly_demand) / 48
 
 fcoj.df$manufacturing_cost <- 2000 * fcoj.df$weekly_demand
 
+fcoj.df$raw_material_cost <- fcoj.df$weekly_demand * 2000 * c(
+    rep(mean.over.months[mean.over.months$grove == 'FLA', ]$mean_month,
+        48),
+    rep(mean.over.months[mean.over.months$grove == 'TEX', ]$mean_month,
+        12),
+    rep(mean.over.months[mean.over.months$grove == 'CAL', ]$mean_month,
+        24))
+
 fcoj.df$profit <- fcoj.df$revenue - (fcoj.df$tanker_car_weekly_purchase_cost +
     fcoj.df$tanker_car_weekly_travel_cost +
     fcoj.df$g_p_weekly_cost + fcoj.df$storage_market_weekly_cost +
     fcoj.df$manufacturing_cost +
     fcoj.df$weekly_proc_build +
-    fcoj.df$weekly_proc_maint)
+    fcoj.df$weekly_proc_maint +
+    fcoj.df$raw_material_cost)
+write.csv(fcoj.df, file='fcoj_demand_opt.csv',
+          quote=FALSE, row.names=FALSE)
 ggplot(fcoj.df, aes(x=price, y=profit, colour=region)) +
     geom_point() + geom_line() +
     ggtitle('FCOJ Profit (Revenue - Trans. - Man. Costs)')

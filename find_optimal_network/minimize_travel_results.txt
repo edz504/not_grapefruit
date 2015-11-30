@@ -1,0 +1,42 @@
+S = 1: S53 gives the min total dist to markets = 96856.0
+S = 2: (u'S52', u'S57') gives the min total dist to markets = 64774.0
+S = 3: (u'S51', u'S54', u'S59') gives the min total dist to markets = 52687.0
+S = 4: (u'S35', u'S51', u'S59', u'S73') gives the min total dist to markets = 45887.0
+
+Current system of S15, S61 gives total dist to markets = 77741.0
+Storage to market cost = $1.20 / ton / mile
+
+Assume that on average, to each of the 100 markets, for each of 48 weeks, we sell 50 tons of ORA, 40 tons of POJ, 35 tons of ROJ, and 30 tons of FCOJ, for an annual total of 744,000 tons of product to all markets over 1 year.  Then we can calculate our forecasted storage to market transportation as 1.20 * D * 744,000, where D is the summed distance for each market to its closest storage calculated above for each storage system.  For context, if we sold all 744k product for $1 / lb, we would bring in ~ 1.5b in revenue.
+
+MomPop s->m cost = 6.937e8 (~ 693 million)
+Optimal 2S cost  = 5.776e8
+Optimal 3S cost  = 4.696e8
+Optimal 4S cost  = 4.089e8 (~ 400 million)
+
+We can supposedly reduce transportation costs by $200m each year by using the optimal 4-storage system.  If we assume that we want all 4 storage systems to have 50k capacity, this will require the following one-time costs:
+
+Sell all S15 capacity = + 0.8 * 6000 * 50000
+Sell all S61 capacity = + 0.8 * 6000 * 51000
+4 new storages = - 4 * 9,000,000
+4 upgrades from 0 -> 50,000 = - 4 * 6000 * 50000
+==========
+-$1,236,000,000
++$484,800,000
+= 1 time cost of 800m
+
+For maintenance, we would need to pay an extra $40m per location per year, which is an annual cost of $80m.
+
+We would save 293m - 40m = 250m every year (over 15 years = 3.75b) means about $2.95 billion saved over the entire game (from s->m transportation only).
+
+Next part of analysis = for these fixed S=4 storage locations, which processing plants should we choose?  Note that we ignored grove to storage distance in the first part.  For analyzing processing plants, we also ignore this and simply look to minimize the total distance from each storage to its closest open processing plant.
+
+P = 1, best set is ['P04'], for a total d = 3779.0
+P = 2, best set is ['P05', 'P07'], for a total d = 2215.0
+P = 3, best set is ['P02', 'P05', 'P07'], for a total d = 1345.0
+P = 4, best set is ['P02', 'P03', 'P05', 'P09'], for a total d = 948.0
+P = 5, best set is ['P02', 'P03', 'P04', 'P05', 'P09'], for a total d = 948.0
+P = 6, best set is ['P02', 'P03', 'P04', 'P05', 'P09', 'P10'], for a total d = 948.0
+P = 7, best set is ['P01', 'P02', 'P03', 'P05', 'P06', 'P07', 'P09'], for a total d = 948.0
+P = 8, best set is ['P01', 'P02', 'P03', 'P05', 'P07', 'P08', 'P09', 'P10'], for a total d = 948.0
+P = 9, best set is ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P08', 'P09', 'P10'], for a total d = 948.0
+P = 10, best set is ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10'], for a total d = 948.0
