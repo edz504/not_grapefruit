@@ -73,6 +73,8 @@ ora.df$raw_material_cost <- ora.df$weekly_demand * 2000 * c(
 ora.df$profit <- ora.df$revenue - (ora.df$weekly_transp_cost +
     ora.df$weekly_storage_build + ora.df$weekly_storage_maint +
     ora.df$raw_material_cost)
+write.csv(ora.df, file='ora_demand_opt.csv',
+          quote=FALSE, row.names=FALSE)
 ggplot(ora.df, aes(x=price, y=profit, colour=region)) +
     geom_point() + geom_line() +
     ggtitle('ORA Profit (Revenue - Trans. Costs)')
@@ -165,6 +167,8 @@ poj.df$profit <- poj.df$revenue - (poj.df$tanker_car_weekly_purchase_cost +
     poj.df$weekly_proc_build +
     poj.df$weekly_proc_maint +
     poj.df$raw_material_cost)
+write.csv(poj.df, file='poj_demand_opt.csv',
+          quote=FALSE, row.names=FALSE)
 ggplot(poj.df, aes(x=price, y=profit, colour=region)) +
     geom_point() + geom_line() +
     ggtitle('POJ Profit (Revenue - Trans. - Man. Costs)')
@@ -263,6 +267,8 @@ roj.df$profit <- roj.df$revenue - (roj.df$tanker_car_weekly_purchase_cost +
     roj.df$weekly_proc_maint +
     roj.df$raw_material_cost +
     roj.df$manufacturing_cost)
+write.csv(roj.df, file='roj_demand_opt.csv',
+          quote=FALSE, row.names=FALSE)
 ggplot(roj.df, aes(x=price, y=profit, colour=region)) +
     geom_point() + geom_line() +
     ggtitle('ROJ Profit (Revenue - Trans. - Man. Costs)')
@@ -351,6 +357,8 @@ fcoj.df$profit <- fcoj.df$revenue - (fcoj.df$tanker_car_weekly_purchase_cost +
     fcoj.df$weekly_proc_build +
     fcoj.df$weekly_proc_maint +
     fcoj.df$raw_material_cost)
+write.csv(fcoj.df, file='fcoj_demand_opt.csv',
+          quote=FALSE, row.names=FALSE)
 ggplot(fcoj.df, aes(x=price, y=profit, colour=region)) +
     geom_point() + geom_line() +
     ggtitle('FCOJ Profit (Revenue - Trans. - Man. Costs)')

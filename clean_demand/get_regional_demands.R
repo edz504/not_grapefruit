@@ -46,4 +46,4 @@ proc.capacity.req <- storage.weekly.demands %>%
 weekly.fcoj.demand <- storage.weekly.demands %>%
   filter(as.integer(product) == 1)
 
-annual.fcoj.demand <- sum(fcoj.demand$total_weekly_demand) * 48
+annual.fcoj.demand <- sum(weekly.fcoj.demand$total_weekly_demand) * 48
