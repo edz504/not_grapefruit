@@ -1,0 +1,3 @@
+We need to calculate the processing and storage capacity necessary for each of the 4 plants and storages to be able to process and store at the "optimal" rate we've calculated.  Note that this is for the period where we have the non-optimal 136k FCOJ futures coming in, we're selling them all, and then also manufacturing FCOJ and reconstituting it into ROJ.
+
+In the future optimal years, the capacities will be adjusted (processing will go down), as the optimal number of FCOJ and ROJ will all come from futures.

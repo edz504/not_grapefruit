@@ -134,5 +134,22 @@ ggplot(diffs, aes(x=price, y=delPdelD, colour=region)) +
 
 # Best so far:
 get.obj.const(c(1.5, 1.5, 1.53, 1.38, 1.4, 2.1, 2))
+
 # [1] 6112246
 # [1] 2836.821
+
+prices <- c(1.5, 1.5, 1.53, 1.38, 1.4, 2.1, 2)
+regions <- unique(fcoj.demands$region)
+
+optimal.fcoj <- data.frame(
+    matrix(NA, length(prices), ncol(fcoj.demands)))
+colnames(optimal.fcoj) <- colnames(fcoj.demands)
+
+for (i in 1:length(prices)) {
+    optimal.fcoj[i, ] <- fcoj.demands[
+        fcoj.demands$region == regions[i] &
+        fcoj.demands$price == prices[i],]
+}
+
+write.csv(optimal.fcoj, 'optimal_fcoj_136k.csv',
+          quote=FALSE, row.names=FALSE)

@@ -1,0 +1,1 @@
+The code here is a revised version of calculating profit-maximizing prices for FCOJ and ROJ, assuming that we're getting them from futures.  This will revise the profit because the costs are different (no manufacturing or processing transport).
