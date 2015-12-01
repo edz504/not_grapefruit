@@ -14,6 +14,10 @@ s35.grove.dist <- 266
 s51.grove.dist <- 967
 s59.grove.dist <- 176
 s73.grove.dist <- 1470
+ora.df$grove_dist <- c(rep(s51.grove.dist, 903),
+                       rep(s73.grove.dist, 301),
+                       rep(s35.grove.dist, 301),
+                       rep(s59.grove.dist, 602))
 
 # We have 301 rows per region (in the order NE, MA, SE, MW, DS, NW, SW)
 region.storage <- read.csv('region_storage_dists_opt.csv')
@@ -24,10 +28,6 @@ ora.df$storage_dist <- c(rep(479.1429, 301),
                          rep(413.3750, 301),
                          rep(659.1250, 301),
                          rep(659, 301))
-ora.df$grove_dist <- c(rep(s51.grove.dist, 903),
-                       rep(s73.grove.dist, 301),
-                       rep(s35.grove.dist, 301),
-                       rep(s59.grove.dist, 602))
 ora.df$weekly_transp_cost <- ora.df$weekly_demand *
   (0.22 * ora.df$grove_dist + 1.2 * ora.df$storage_dist)
 
@@ -121,16 +121,18 @@ poj.df$p_s_dist <- c(rep(317, 903),
                      rep(98, 301),
                      rep(140, 301),
                      rep(393, 602))
+
 # For tanker car cost, we need to calculate how many tanker
 # cars the given demand would require, multiply by its purchase
 # cost, and then add the weekly traveling cost.  We'll spread the
 # one time purchase cost over weeks by dividing it by 48.
-
-poj.df$num_tanker_cars_needed <- poj.df$weekly_demand / 30
+poj.df$num_tanker_cars_needed <- 2 * poj.df$weekly_demand / 30
 poj.df$tanker_car_weekly_purchase_cost <- 
     poj.df$num_tanker_cars_needed * 100000 / 48
 poj.df$tanker_car_weekly_travel_cost <- 36 *
-    poj.df$num_tanker_cars_needed * poj.df$p_s_dist
+    0.5 * poj.df$num_tanker_cars_needed * poj.df$p_s_dist
+poj.df$tanker_car_weekly_hold_cost <- 10 *
+    0.5 * poj.df$num_tanker_cars_needed
 
 poj.df$g_p_weekly_cost <- 0.22 * poj.df$weekly_demand * poj.df$g_p_dist
 poj.df$storage_market_weekly_cost <- 1.2 * poj.df$weekly_demand *
@@ -159,17 +161,23 @@ poj.df$raw_material_cost <- poj.df$weekly_demand * 2000 * c(
         2 * 301))
 
 
-poj.df$year1_profit <- poj.df$revenue - (poj.df$tanker_car_weekly_purchase_cost +
+poj.df$year1_profit <- poj.df$revenue - (
+    poj.df$tanker_car_weekly_purchase_cost +
     poj.df$tanker_car_weekly_travel_cost +
-    poj.df$g_p_weekly_cost + poj.df$storage_market_weekly_cost +
+    poj.df$tanker_car_weekly_hold_cost +
+    poj.df$g_p_weekly_cost +
+    poj.df$storage_market_weekly_cost +
     poj.df$manufacturing_cost +
     poj.df$weekly_proc_build +
     poj.df$weekly_proc_maint +
     poj.df$raw_material_cost +
     poj.df$weekly_storage_build +
     poj.df$weekly_storage_maint)
-poj.df$profit <- poj.df$year1_profit +
-    (poj.df$weekly_proc_build + poj.df$weekly_storage_build)
+poj.df$profit <- poj.df$year1_profit + (
+     poj.df$tanker_car_weekly_purchase_cost +
+     poj.df$weekly_proc_build +
+     poj.df$weekly_storage_build
+     )
 ggplot(poj.df, aes(x=price, colour=region)) +
     geom_line(aes(y=year1_profit), linetype='dotted') +
     geom_line(aes(y=profit)) +
@@ -224,12 +232,13 @@ roj.df$p_s_dist <- c(rep(317, 903),
 # cars the given demand would require, multiply by its purchase
 # cost, and then add the weekly traveling cost.  We'll spread the
 # one time purchase cost over weeks by dividing it by 48.
-
-roj.df$num_tanker_cars_needed <- roj.df$weekly_demand / 30
+roj.df$num_tanker_cars_needed <- 2 * roj.df$weekly_demand / 30
 roj.df$tanker_car_weekly_purchase_cost <- 
     roj.df$num_tanker_cars_needed * 100000 / 48
 roj.df$tanker_car_weekly_travel_cost <- 36 *
-    roj.df$num_tanker_cars_needed * roj.df$p_s_dist
+    0.5 * roj.df$num_tanker_cars_needed * roj.df$p_s_dist
+roj.df$tanker_car_weekly_hold_cost <- 10 *
+    0.5 * roj.df$num_tanker_cars_needed
 
 roj.df$g_p_weekly_cost <- 0.22 * roj.df$weekly_demand * roj.df$g_p_dist
 roj.df$storage_market_weekly_cost <- 1.2 * roj.df$weekly_demand *
@@ -237,6 +246,8 @@ roj.df$storage_market_weekly_cost <- 1.2 * roj.df$weekly_demand *
 
 roj.df$weekly_storage_build <- 6000 * roj.df$weekly_demand / 48
 roj.df$weekly_storage_maint <- (650 * roj.df$weekly_demand) / 48
+roj.df$weekly_proc_build <- 8000 * roj.df$weekly_demand / 48
+roj.df$weekly_proc_maint <- (2500 * roj.df$weekly_demand) / 48
 
 # Reconstitution cost
 roj.df$reconstitution_cost <- 650 * roj.df$weekly_demand
@@ -254,15 +265,24 @@ roj.df$raw_material_cost <- roj.df$weekly_demand * 2000 * c(
 # FCOJ to get ROJ (assume no futures).
 roj.df$manufacturing_cost <- 2000 * roj.df$weekly_demand
 
-roj.df$year1_profit <- roj.df$revenue - (roj.df$tanker_car_weekly_purchase_cost +
+roj.df$year1_profit <- roj.df$revenue - (
+    roj.df$tanker_car_weekly_purchase_cost +
     roj.df$tanker_car_weekly_travel_cost +
-    roj.df$g_p_weekly_cost + roj.df$storage_market_weekly_cost +
+    roj.df$tanker_car_weekly_hold_cost +
+    roj.df$g_p_weekly_cost +
+    roj.df$storage_market_weekly_cost +
+    roj.df$manufacturing_cost +
     roj.df$reconstitution_cost +
-    roj.df$weekly_storage_build +
-    roj.df$weekly_storage_maint +
+    roj.df$weekly_proc_build +
+    roj.df$weekly_proc_maint +
     roj.df$raw_material_cost +
-    roj.df$manufacturing_cost)
-roj.df$profit <- roj.df$year1_profit + roj.df$weekly_storage_build
+    roj.df$weekly_storage_build +
+    roj.df$weekly_storage_maint)
+roj.df$profit <- roj.df$year1_profit + (
+     roj.df$tanker_car_weekly_purchase_cost +
+     roj.df$weekly_proc_build +
+     roj.df$weekly_storage_build
+     )
 ggplot(roj.df, aes(x=price, y=profit, colour=region)) +
     geom_line(aes(y=year1_profit), linetype='dotted') +
     geom_line(aes(y=profit)) +
