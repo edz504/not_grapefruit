@@ -5,10 +5,10 @@ library(reshape2)
 # Note: ORA is inflated
 cwd <- getwd()
 setwd('..')
-ora <- read.csv('clean_demand/ora_demand_opt.csv')
-poj <- read.csv('clean_demand/poj_demand_opt.csv')
-roj <- read.csv('clean_demand/roj_demand_opt.csv')
-fcoj <- read.csv('clean_demand/fcoj_demand_opt.csv')
+ora <- read.csv('clean_demand/ora_demand.csv')
+poj <- read.csv('clean_demand/poj_demand.csv')
+roj <- read.csv('clean_demand/roj_demand.csv')
+fcoj <- read.csv('clean_demand/fcoj_demand.csv')
 setwd(cwd)
 products <- c('ORA', 'POJ', 'ROJ', 'FCOJ')
 regions <- sapply(unique(ora$region), as.character)
@@ -23,7 +23,7 @@ for (df in list(ora, poj, roj, fcoj)) {
     j <- 1
     for (region in regions) {
         fit.df <- data.frame(
-            weekly.demand=df[df$region == region, ]$weekly_demand,
+            weekly.demand=df[df$region == region, ]$demand / 4,
             price=df[df$region == region, ]$price)
         fit.df <- fit.df[fit.df$weekly.demand > 0, ]
         model <- lm(fit.df$weekly.demand ~ I(fit.df$price ^ (-2)))

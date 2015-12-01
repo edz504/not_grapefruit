@@ -1,3 +1,3 @@
-The code here takes the sales results from the practice rounds and estimates demands.  Censored demand is left as zero, and partially-censored (e.g. 2 weeks out of 4) is projected to a 4-week scale.  There are also various other scripts that attempt to calculate profit as a function of projected sales and costs (manufacturing, storage, transportation, etc.), and then maximize.
+get_clean_demand.py uses the Practice 1 and Practice 2 notebooks to create the ora_demand.csv, poj_demand.csv, ... files.  Beginning months were projected to month-scale (e.g. if ROJ only had sales in the last week of month 1, we multiplied the monthly sales by 4), but if any of the weeks were censored, we just zeroed out the demand.
 
-For a cleaner look at demand, see the fit_demand folder.  There is code there that extracts the raw demands here and fits a function to each region's demand for each product as a function of price.
+Disregard the other files, as they are deprecated code.
