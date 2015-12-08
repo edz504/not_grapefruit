@@ -22,6 +22,8 @@ for s in xrange(0, D.shape[1]):
     total_distances[s] = sum(D[:, s])
 best = min(total_distances, key=total_distances.get)
 
+
+
 # S = 2
 total_distances_2 = {}
 for i in xrange(0, D.shape[1]):

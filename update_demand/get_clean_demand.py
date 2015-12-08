@@ -16,6 +16,7 @@ ORA_sales = np.array(Range('ORA', 'D109:O115', atleast_2d=True).value)
 
 ORA_demand = pd.DataFrame(
         {'price': list(price_over_month) * 7,
+         'month': months * len(regions),
          'region': [region for region in regions
                     for j in xrange(0, len(months))],
          'sales': ORA_sales.ravel(),
@@ -61,6 +62,7 @@ POJ_demand_mat[:, 9:12] = 0
 
 POJ_demand = pd.DataFrame(
         {'price': list(price_over_month) * 7,
+         'month': months * len(regions),
          'region': [region for region in regions
                     for j in xrange(0, len(months))],
          'sales': POJ_sales.ravel(),
@@ -91,6 +93,7 @@ ROJ_demand_mat[:, 9:12] = 0
 
 ROJ_demand = pd.DataFrame(
         {'price': list(price_over_month) * 7,
+         'month': months * len(regions),
          'region': [region for region in regions
                     for j in xrange(0, len(months))],
          'sales': ROJ_sales.ravel(),
@@ -122,6 +125,7 @@ FCOJ_demand_mat[4:8, 7] = 0
 
 FCOJ_demand = pd.DataFrame(
         {'price': list(price_over_month) * 7,
+         'month': months * len(regions),
          'region': [region for region in regions
                     for j in xrange(0, len(months))],
          'sales': FCOJ_sales.ravel(),
