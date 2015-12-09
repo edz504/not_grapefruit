@@ -44,7 +44,7 @@ def initialize(input_file):
         storages[i] = Storage(
             name=name,
             capacity=capacity,
-            inventory=[(0, 0, 0, 0)] * 48)
+            inventory=[(0, 0, 0, 0)] * 48) # NOTE: CHANGE THIS TO BE LEFTOVER
 
     # Initialize Processing Plants
     all_processing_plant_names = Range('facilities', 'B6:B15').value
@@ -60,9 +60,10 @@ def initialize(input_file):
         processing_plants[i] = ProcessingPlant(
             name=name,
             capacity=capacity,
-            raw_inventory=0,
+            inventory=0,
             manufactured_inventory=[(0, 0, 0, 0)] * 48,
             tanker_cars=(tanker_car_count, 0, 0))
+
     # Initialize Groves
     groves = [Grove(name=grove, month=0)
               for grove in Range('raw_materials', 'B6:B11').value]
@@ -108,19 +109,19 @@ def initialize(input_file):
 
     # Shipping and manufacturing decisions
     from_grove_df = pd.DataFrame(
-        Range('shipping_and_manufacturing', (6, 3),
+        Range('shipping_manufacturing', (6, 3),
               (11, 2 + num_storages + num_processing_plants)).value,
-              index=Range('shipping_and_manufacturing', 'B6:B11').value,
-              columns=Range('shipping_and_manufacturing', 'C5:J5').value)
+              index=Range('raw_materials', 'B17:B22').value, # Other FLA dirty
+              columns=Range('shipping_manufacturing', 'C5:J5').value)
     decisions['shipping'] = {
         'from_grove': from_grove_df
     }
 
     manufacturing_df = pd.DataFrame(
-        Range('shipping_and_manufacturing', (17, 3),
+        Range('shipping_manufacturing', (17, 3),
               (19, 2 + num_processing_plants * 2)).value)
     names = [name for name in
-                [n for n in manufacturing_df.iloc[0, :] if n is not None]
+                [n for n in manufacturing_df.iloc[0, :] if n is not None]0
              for i in xrange(0, 2)]
     manufacturing_df.columns = pd.MultiIndex.from_tuples(
         zip(names, manufacturing_df.iloc[1, :]))
@@ -128,11 +129,11 @@ def initialize(input_file):
         manufacturing_df.index.drop([0, 1]))
 
     decisions['shipping']['futures'] = dict(
-        zip(Range('shipping_and_manufacturing', 'B27:B30').value,
-            Range('shipping_and_manufacturing', 'C27:C30').value))
+        zip(Range('shipping_manufacturing', 'B27:B30').value,
+            Range('shipping_manufacturing', 'C27:C30').value))
 
     from_plant_df = pd.DataFrame(
-        Range('shipping_and_manufacturing', (25, 4),
+        Range('shipping_manufacturing', (25, 4),
               (30, 3 + num_processing_plants * 2)).value)
     names = [name for name in 
                 [n for n in from_plant_df.iloc[0, :] if n is not None]
@@ -143,10 +144,10 @@ def initialize(input_file):
         from_plant_df.index.drop([0, 1]))
 
     decisions['reconstitution'] = pd.DataFrame(
-        Range('shipping_and_manufacturing',
+        Range('shipping_manufacturing',
               'C38:N41', atleast_2d=True).value,
-        index=Range('shipping_and_manufacturing', 'B38:B41').value,
-        columns = Range('shipping_and_manufacturing', 'C37:N37').value)
+        index=Range('shipping_manufacturing', 'B38:B41').value,
+        columns = Range('shipping_manufacturing', 'C37:N37').value)
 
     # Pricing decisions
     months = Range('pricing', 'D5:O5').value
@@ -174,22 +175,4 @@ def initialize(input_file):
         'FCOJ': fcoj_df
     }
     
-    return decisions
-
-
-# decisions, groves, storages, processing_plants = initialize(input_file)
-# deliveries = []
-
-# sales = [None] * 48
-# cost = [None] * 48
-
-# for t in xrange(0, 49):
-#     # Check all deliveries for arrival / finish
-
-#     # Grove: new spot purchases and shipping
-
-#     # ProcessingPlant: new manufacturing processes and shipping
-
-#     # Storage: new reconstitution
-
-#     # Market: sell
+    return decisions, groves, storages, processing_plants
