@@ -121,7 +121,7 @@ def initialize(input_file):
         Range('shipping_manufacturing', (17, 3),
               (19, 2 + num_processing_plants * 2)).value)
     names = [name for name in
-                [n for n in manufacturing_df.iloc[0, :] if n is not None]0
+                [n for n in manufacturing_df.iloc[0, :] if n is not None]
              for i in xrange(0, 2)]
     manufacturing_df.columns = pd.MultiIndex.from_tuples(
         zip(names, manufacturing_df.iloc[1, :]))
