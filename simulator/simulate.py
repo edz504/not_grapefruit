@@ -12,7 +12,7 @@ import sys
 input_file = ('''/Users/edz/Documents/Princeton/Senior/ORF411'''
               '''/OJ/not_grapefruit/Results/notgrapefruit2016.xlsm''')
 
-decisions, groves, storages, processing_plants = initialize(input_file)
+storages, processing_plants, groves, markets, decisions = initialize(input_file)
 
 processes = []
 deliveries = []
@@ -31,16 +31,53 @@ cost = [{
 # Starts at beginning of week 0
 for t in xrange(0, 49):
     # Age all storages and processing plants.
+    for storage in storages:
+        storage.age()
+    for processing_plant in processing_plants:
+        processing_plant.age()
 
-    # Check Processes that finished and create resulting Deliveries.
-    # Need to group by plant in order to send out tanker cars / carriers.
+    # Check Processes that finished and create resulting Deliveries
+    # (manufacturing, need to group by plant in order to send out tanker cars
+    # / carriers), or adjust inventory (reconstitution).
+    for process in processes:
+        if process.finish_time == t:
+            # Manufacturing
+            if start_product == 'ORA':
+                process.location.inventory['ORA'] -= process.amount
+                # Send out Deliveries -- this will be weird with tanker cars...
+            # Reconstitution
+            elif start_product == 'FCOJ':
+                process.location.inventory['XOJ'] -= process.amount
+                process.location.inventory['ROJ'] += process.amount
+            else:
+                raise ValueError('Process must start with ORA or FCOJ')
 
-    # Check Deliveries that arrive.  Need to group by storage in order to
-    # accurately do capacity check.
-    
+    # Check Deliveries that arrive.  Add in all incoming deliveries, and then
+    # do a capacity check afterwards (both storages and plants).
+    for delivery in deliveries:
+        if delivery.arrival_time == t:
+            delivery.receiver.inventory[delivery.product] += delivery.amount
+    for storage in storages:
+        total_inventory = sum(
+            [sum(vals) for vals in storage.inventory.values()])
+        storage.dispose_capacity(total_inventory - storage.capacity)
+    for processing_plant in processing_plants:
+        total_inventory = sum(
+            [sum(vals) for vals in processing_plant.inventory.values()])
+        processing_plant.dispose_capacity(
+            total_inventory - processing_plant.capacity)
+
     # Go through Groves and make spot purchases (create Deliveries).
+    # Also make Futures deliveries for FLA.
+    for grove in groves:
+        new_deliveries, raw_cost, shipping_cost = grove.spot_purchase(t)
+        deliveries += new_deliveries
+        cost['purchase']['raw'] += raw_cost
+        cost['transportation']['from_grove'] += shipping_cost
 
     # Go through Plants and manufacture (create Processes).
+    for processing_plant in processing_plants:
+        
 
     # Go through Storages and reconstitute (create Processes), don't forget
     # XOJ.
