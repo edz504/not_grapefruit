@@ -128,14 +128,14 @@ def initialize(input_file):
     # Capacity decisions
     old_plant = Range('facilities', 'D6:D15').value
     new_plant = Range('facilities', 'G6:G15').value
-    decisions['capacity'] = {'processing': dict(zip(all_processing_plant_names,
-                                                    zip(old_plant, new_plant))),
-                             'tankers': 
-    }
+    # decisions['capacity'] = {'processing': dict(zip(all_processing_plant_names,
+    #                                                 zip(old_plant, new_plant))),
+    #                          'tankers': 
+    # }
 
-    Range('facilities', 'C6:C15').value,
-                             'tankers': Range('facilities', 'C21:C30').value,
-                             'storage': Range('facilities', 'C36:C106').value}
+    # Range('facilities', 'C6:C15').value,
+    #                          'tankers': Range('facilities', 'C21:C30').value,
+    #                          'storage': Range('facilities', 'C36:C106').value}
 
     # Futures decisions for this year aren't what we pick.  We're
     # really grabbing the decisions we made earlier.

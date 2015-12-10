@@ -44,11 +44,54 @@ class Storage(object):
         self.inventory = inventory
 
     def reconstitute(t):
-        pass
+        recon_percentage = self.reconstitution_percentages[t]
+        fcoj_inventory = sum(self.inventory['FCOJ'])
+        amount_to_recon = recon_percentage * fcoj_inventory
+
+        self.remove_product('FCOJ', amount_to_recon)
+        self.add_product('XOJ', amount_to_recon)
+
+        recon_process = Process(self, t + 1, 'FCOJ', 'ROJ', amount_to_recon)
+        recon_cost = 650 * amount_to_recon
+
+        return (recon_process, recon_cost)
 
     def dispose_capacity(shortage):
-        pass
+        if shortage <= 0:
+            return
+        else:
+            # indices to be used to check inventory amount
+            indices = [3, 7, 11, 47]
 
+            amount_to_remove = shortage
+            while amount_to_remove > 0:
+                # Calculate weekly inventories for each product
+                weekly_inventories = [self.inventory['ORA'][indices[0]],
+                                      self.inventory['POJ'][indices[1]],
+                                      self.inventory['ROJ'][indices[2]],
+                                      self.inventory['FCOJ'][indices[3]]]
+
+                week_total = sum(weekly_inventories)
+                if week_total < amount_remove:
+                    self.remove_product('ORA', weekly_inventories[0])
+                    self.remove_product('POJ', weekly_inventories[1])
+                    self.remove_product('ROJ', weekly_inventories[2])
+                    self.remove_product('FCOJ', weekly_inventories[3])
+
+
+                else:
+                    # Calculate proportion to remove for each product
+                    p = amount_to_remove/week_total
+
+                    self.remove_product('ORA', weekly_inventories[0]*p)
+                    self.remove_product('POJ', weekly_inventories[1]*p)
+                    self.remove_product('ROJ', weekly_inventories[2]*p)
+                    self.remove_product('FCOJ', weekly_inventories[3]*p)
+
+                amount_to_remove -= week_total
+                indices = [i - 1 for i in indices]
+
+            return
     def age():
         pass
 
@@ -56,10 +99,15 @@ class Storage(object):
         pass
 
     def remove_product(product, amount):
+        if amount == 0:
+            return
         pass
 
     def get_total_inventory(product=None):
-        return sum([sum(vals) for vals in self.inventory.values()])
+        if product is None:
+            return sum([sum(vals) for vals in self.inventory.values()])
+        else:
+            return sum(self.inventory[product])
 
 
 class ProcessingPlant(object):
