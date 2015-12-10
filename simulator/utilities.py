@@ -43,7 +43,7 @@ class Storage(object):
         self.reconstitution_percentages = reconstitution_percentages
         self.inventory = inventory
 
-    def reconstitute(percentage, t):
+    def reconstitute(t):
         pass
 
     def dispose_capacity(shortage):
@@ -51,6 +51,15 @@ class Storage(object):
 
     def age():
         pass
+
+    def add_product(product, amount):
+        pass
+
+    def remove_product(product, amount):
+        pass
+
+    def get_total_inventory(product=None):
+        return sum([sum(vals) for vals in self.inventory.values()])
 
 
 class ProcessingPlant(object):
@@ -64,7 +73,7 @@ class ProcessingPlant(object):
         self.tanker_cars = tanker_cars
         self.shipping_plan = shipping_plan
 
-    def manufacture(percentage, t):
+    def manufacture(t):
         pass
 
     def dispose_capacity(shortage):
@@ -72,6 +81,15 @@ class ProcessingPlant(object):
 
     def age():
         pass
+
+    def add_product(product, amount):
+        pass
+
+    def remove_product(product, amount):
+        pass
+
+    def get_total_inventory(product=None):
+        return sum([sum(vals) for vals in self.inventory.values()])
 
 
 class Grove(object):
@@ -103,8 +121,8 @@ class Grove(object):
         else:
             return 0
 
-    def spot_purchase(amount, shipping_plan, t):
-        price = self.realize_price_month(int(t / 4))
+    def spot_purchase(t):
+        pass
 
 
 

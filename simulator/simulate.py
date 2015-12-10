@@ -17,23 +17,48 @@ storages, processing_plants, groves, markets, decisions = initialize(input_file)
 processes = []
 deliveries = []
 
-sales = [{'ORA': 0, 'POJ': 0, 'ROJ': 0, 'FCOJ': 0}] * 48
-cost = [{
-    'purchase': {'raw': 0, 'futures': {'ORA': 0, 'FCOJ': 0}},
-    'manufacturing': {'POJ': 0, 'FCOJ': 0, 'ROJ (reconstitution)': 0},
-    'transportation': {'from_grove': 0, 'from_plants': 0, 'from_storages': 0},
+sales = {'ORA': 0, 'POJ': 0, 'ROJ': 0, 'FCOJ': 0}
+# Can easily modify the below to be week by week
+cost = {
+    'purchase': {
+        'raw': 0,
+        'futures': {
+            'ORA': 0,
+            'FCOJ': 0
+        }
+    },
+    'manufacturing': {
+        'POJ': 0,
+        'FCOJ': 0, 
+        'ROJ (reconstitution)': 0
+    },
+    'transportation': {
+        'from_grove': 0,
+        'from_plants': 0,
+        'from_storages': 0
+    },
     'inventory_hold': 0,
-    'maintenance': {'storage': 0, 'processing': 0, 'tanker': 0},
-    'capacity': {'storage': 0, 'processing': 0, 'tanker': 0}
-}] * 48
+    'maintenance': {
+        'storage': 0,
+        'processing': 0,
+        'tanker': 0
+    },
+    'capacity_change': {
+        'storage': 0,
+        'processing': 0,
+        'tanker': 0
+    }
+}
 
 
 # Starts at beginning of week 0
 for t in xrange(0, 49):
+    month_ind = int(t / 4)
+
     # Age all storages and processing plants.
-    for storage in storages:
+    for storage in storages.values():
         storage.age()
-    for processing_plant in processing_plants:
+    for processing_plant in processing_plants.values():
         processing_plant.age()
 
     # Check Processes that finished and create resulting Deliveries
@@ -43,12 +68,14 @@ for t in xrange(0, 49):
         if process.finish_time == t:
             # Manufacturing
             if start_product == 'ORA':
-                process.location.inventory['ORA'] -= process.amount
+                process.location.remove_product('ORA', process.amount)
+                # TODO (Eddie):
                 # Send out Deliveries -- this will be weird with tanker cars...
+                # Make sure to add to from_plant costs, and tanker hold cost.
             # Reconstitution
             elif start_product == 'FCOJ':
-                process.location.inventory['XOJ'] -= process.amount
-                process.location.inventory['ROJ'] += process.amount
+                process.location.remove_product('XOJ', process.amount)
+                process.location.add_product('ROJ', process.amount)
             else:
                 raise ValueError('Process must start with ORA or FCOJ')
 
@@ -56,82 +83,77 @@ for t in xrange(0, 49):
     # do a capacity check afterwards (both storages and plants).
     for delivery in deliveries:
         if delivery.arrival_time == t:
-            delivery.receiver.inventory[delivery.product] += delivery.amount
-    for storage in storages:
-        total_inventory = sum(
-            [sum(vals) for vals in storage.inventory.values()])
-        storage.dispose_capacity(total_inventory - storage.capacity)
-    for processing_plant in processing_plants:
-        total_inventory = sum(
-            [sum(vals) for vals in processing_plant.inventory.values()])
+            delivery.receiver.add_product(delivery.product, delivery.amount)
+    for storage in storages.values():
+        storage.dispose_capacity(
+            storage.get_total_inventory() - storage.capacity)
+    for processing_plant in processing_plants.values():
         processing_plant.dispose_capacity(
-            total_inventory - processing_plant.capacity)
+            processing_plant.get_total_inventory() - processing_plant.capacity)
 
     # Go through Groves and make spot purchases (create Deliveries).
     # Also make Futures deliveries for FLA.
-    for grove in groves:
+    for grove in groves.values():
         new_deliveries, raw_cost, shipping_cost = grove.spot_purchase(t)
         deliveries += new_deliveries
         cost['purchase']['raw'] += raw_cost
         cost['transportation']['from_grove'] += shipping_cost
 
+        if grove.name == 'FLA':
+            # ORA futures
+            ORA = decisions['futures']['ORA']
+            total_weekly_quantity = (ORA['quantity'] *
+                (ORA['arrivals'][month_ind] / 100) * 0.25)
+            for location, proportion in grove.shipping_plan.iteritems():
+                if location[0] == 'P':
+                    receiver = processing_plants[location]
+                else:
+                    receiver = storages[location]
+                deliveries.append(
+                    Delivery(sender=grove,
+                             receiver=receiver,
+                             arrival_time=(t+1),
+                             amount=total_weekly_quantity * proportion))
+
+            # FCOJ futures
+            FCOJ = decisions['futures']['FCOJ']
+            total_weekly_quantity = (FCOJ['quantity'] *
+                (FCOJ['arrivals'][month_ind] / 100) * 0.25)
+            for storage_name, proportion in FCOJ['shipping'].iteritems():
+                receiver = storages[storage_name]
+                deliveries.append(
+                    Delivery(sender=grove,
+                             receiver=receiver,
+                             arrival_time=(t + 1),
+                             amount=total_weekly_quantity * proportion))
+
     # Go through Plants and manufacture (create Processes).
-    for processing_plant in processing_plants:
-        
+    for processing_plant in processing_plants.values():
+        new_processes, cost_poj, cost_fcoj = processing_plant.manufacture(t)
+        processes += new_processes
+        cost['manufacturing']['POJ'] += cost_poj
+        cost['manufacturing']['FCOJ'] += cost_fcoj
 
-    # Go through Storages and reconstitute (create Processes), don't forget
-    # XOJ.
+    # Go through Storages and reconstitute (create Processes), using the XOJ.
+    for storage in storages.values():
+        recon_percent = storage.reconstitution_percentages[month_ind]
+        Y = recon_percent * storage.inventory['FCOJ']
+        storage.remove_product('FCOJ', Y)
+        storage.add_product('XOJ', Y)
+        new_processes, cost = storage.reconstitute(t)
+        processes.append(new_processes)
+        cost['manufacturing']['ROJ (reconstitution)'] += cost
 
-    # Go through Storages / Markets and sell
+    # Go through Storages / Markets and sell.  Make sure to add to from_storage
+    # costs.
 
     # Calculate holding costs.
+    for storage in storages.values():
+        cost['inventory_hold'] += storage.get_total_inventory() * 60
 
-
-
-
-
-
-    # Check all deliveries for arrival / finish
-    for delivery in deliveries:
-        if delivery.arrival_time == t:
-            delivery.receiver.inventory += 
-
-        # When we increment inventories, that's when we need to
-        # check for capacity disposal.
-        pass
-
-    # Grove: new spot purchases and shipping
-    for grove in groves:
-
-        # Realize a price.
-        price = grove.realize_month_price()
-
-        # Determine quantity to ask for based on multipliers from decisions,
-        # and the realized price.
-        quantity_df = decisions['spot_purchases']['quantities']
-        multiplier_df = decisions['spot_purchases']['multipliers']
-        quantity = apply_multipliers(grove.name, t, price, quantity_df,
-                                     multiplier_df)
-
-        # Execute the purchase (add new deliveries).
-        deliveries += grove.spot_purchase(
-            quantity, decisions['shipping']['from_grove'].loc[grove.name, :],
-            t)
-
-    # ProcessingPlant: new manufacturing processes
-    for plant in processing_plants:
-        poj_percentage = decisions['manufacturing'][plant.name]['POJ']
-        deliveries += plant.process(poj_percentage, t)
-
-    # Storage: new reconstitution processes
-    for storage in storages:
-        recon_percentage = decisions['reconstitution'].loc[storage.name][int(
-            t / 4)]
-        deliveries += storage.reconstitute(recon_percentage)
-        storage.check_rotten()
-
-    # Market: sell
-    # Need to loop through storages in order to be able to do proportional
-    # satisfying
-
-    # Holding cost
+# Add in annual costs
+cost['purchase']['futures']['ORA'] += decisions['futures']['ORA']['total_price']
+cost['purchase']['futures']['FCOJ'] += decisions['futures']['FCOJ']['total_price']
+cost['maintenance']['storage'] += sum([7.5e6 + 650 * s.capacity for s in storages.values()])
+cost['maintenance']['processing'] += sum([8.0e6 + 2500 * s.capacity for s in storages.values()])
+# cost['capacity_change']['storage'] += 
