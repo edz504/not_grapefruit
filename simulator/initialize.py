@@ -6,8 +6,46 @@ from utilities import *
 from xlwings import Workbook, Range
 
 def initialize(input_file):
-    wb = Workbook(input_file)
+    # Initialize the markets
+    markets = {}
+    ROOT_DIR = os.path.dirname(os.getcwd())
+    wb = Workbook(
+        os.path.join(ROOT_DIR,'reference/StaticData-mod.xlsx'))
+    market_names = Range(
+        'S->M', 'A2:B101', atleast_2d=True).value
+    for val in market_names:
+        name = val[1]
+        region = val[0]
+        prices = {
+            'ORA': Range('pricing', 'D{0}:O{0}'.format(
+                6 + REGIONS.index(region))).value,
+            'POJ': Range('pricing', 'D{0}:O{0}'.format(
+                15 + REGIONS.index(region))).value,
+            'ROJ': Range('pricing', 'D{0}:O{0}'.format(
+                24 + REGIONS.index(region))).value,
+            'FCOJ': Range('pricing', 'D{0}:O{0}'.format(
+                33 + REGIONS.index(region))).value
+        }
 
+        # TODO (Eddie): read in real demand coefficient beliefs later
+        coefs = [(1000, -20), (1000, -20), (1000, -20), (1000, -20)]
+        # TODO (Eddie): read in real demand variance beliefs later
+        stats = [10, 10, 10, 10]
+        markets[name] = Market(name=name,
+                               region=region,
+                               prices=prices,
+                               demand_function_coefs=coefs,
+                               demand_stats=stats)
+
+    # To find the closest storage for each market, we need to retrieve the
+    # distance matrix from the static data file, and then initialize the
+    # storages.
+    D = pd.DataFrame(np.array(
+        Range('S->M', 'C2:BU101', atleast_2d=True).value))
+    D.columns = Range('S->M', 'C1:BU1').value
+    D.index = Range('S->M', 'B2:B101').value
+
+    wb = Workbook(input_file)
     # Initialize Storage Systems
     all_storage_names = Range('facilities', 'B36:B106').value
     num_storages = int(Range('basic_info', 'D8').value)
@@ -29,6 +67,23 @@ def initialize(input_file):
                        'FCOJ': [0] * 48,
                        'XOJ': [0] * 1
             }) # TODO (Eddie): Initialize inventory to leftover.
+
+    # Each key is a storage name, the value is a list of the markets that it
+    # will sell to.
+    storage_closest_markets = dict(
+        zip(all_storage_names,[[] for i in xrange(0, len(all_storage_names))]))
+
+    # Filter out D to only be columns where we have storages open.
+    D_open = D[storages.keys()]
+    for market_name, market in markets.iteritems():
+        dists = D_open.loc[market_name, :]
+        min_dist = min(dists)
+        min_ind = list(dists).index(min_dist)
+        storage_closest_markets[D_open.columns[min_ind]].append((market,
+                                                                 min_dist))
+
+    for name, storage in storages.iteritems():
+        storage.markets = storage_closest_markets[name]
 
     # Initialize Processing Plants
     all_processing_plant_names = Range('facilities', 'B6:B15').value
@@ -89,38 +144,6 @@ def initialize(input_file):
                                    multipliers=multipliers,
                                    shipping_plan=shipping_plan)
 
-    # Initialize the markets
-    markets = {}
-    ROOT_DIR = os.path.dirname(os.getcwd())
-    wb = Workbook(
-        os.path.join(ROOT_DIR,'reference/StaticData-mod.xlsx'))
-    market_names = Range(
-        'S->M', 'A2:B101', atleast_2d=True).value
-    wb = Workbook(input_file)
-    for val in market_names:
-        name = val[1]
-        region = val[0]
-        prices = {
-            'ORA': Range('pricing', 'D{0}:O{0}'.format(
-                6 + REGIONS.index(region))).value,
-            'POJ': Range('pricing', 'D{0}:O{0}'.format(
-                15 + REGIONS.index(region))).value,
-            'ROJ': Range('pricing', 'D{0}:O{0}'.format(
-                24 + REGIONS.index(region))).value,
-            'FCOJ': Range('pricing', 'D{0}:O{0}'.format(
-                33 + REGIONS.index(region))).value
-        }
-
-        # TODO (Eddie): read in real demand coefficient beliefs later
-        coefs = [(1000, -20), (1000, -20), (1000, -20), (1000, -20)]
-        # TODO (Eddie): read in real demand variance beliefs later
-        stats = [10, 10, 10, 10]
-        markets[name] = Market(name=name,
-                               region=region,
-                               prices=prices,
-                               demand_function_coefs=coefs,
-                               demand_stats=stats)
-
     # Initialize decisions dictionary -- this will contain capacity and futures
     # decisions, which do not conceptualize easily with the objects.
     decisions = {}
@@ -128,14 +151,17 @@ def initialize(input_file):
     # Capacity decisions
     old_plant = Range('facilities', 'D6:D15').value
     new_plant = Range('facilities', 'G6:G15').value
+    old_tankers = Range('facilities', 'D21:D30').value
+    new_tankers = Range('facilities', 'G21:G30').value
+    old_storage = Range('facilities', 'D36:D106').value
+    new_storage = Range('facilities', 'G36:G106').value
     decisions['capacity'] = {'processing': dict(zip(all_processing_plant_names,
                                                     zip(old_plant, new_plant))),
-                             'tankers': 
+                             'tankers': dict(zip(all_processing_plant_names,
+                                                 zip(old_tankers, new_tankers))),
+                             'storage': dict(zip(all_storage_names,
+                                             zip(old_storage, new_storage)))
     }
-
-    Range('facilities', 'C6:C15').value,
-                             'tankers': Range('facilities', 'C21:C30').value,
-                             'storage': Range('facilities', 'C36:C106').value}
 
     # Futures decisions for this year aren't what we pick.  We're
     # really grabbing the decisions we made earlier.

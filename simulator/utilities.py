@@ -37,11 +37,13 @@ class Process(object):
 
 class Storage(object):
 
-    def __init__(self, name, capacity, reconstitution_percentages, inventory):
+    def __init__(self, name, capacity, reconstitution_percentages, inventory,
+                 markets=None): # in sim, market provided after creation
         self.name = name
         self.capacity = capacity
         self.reconstitution_percentages = reconstitution_percentages
         self.inventory = inventory
+        self.markets = markets
 
     def reconstitute(t):
         pass
@@ -136,7 +138,7 @@ class Market(object):
         self.demand_function_coefs = demand_function_coefs
         self.demand_stats = demand_stats
 
-    def realize_demand(price, product):
+    def realize_demand(product, t):
         pass
 
 

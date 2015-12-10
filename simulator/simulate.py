@@ -3,6 +3,7 @@ from utilities import *
 import numpy as np
 import pandas as pd
 import sys
+import time
 
 # input_file = sys.argv[1]
 
@@ -12,13 +13,14 @@ import sys
 input_file = ('''/Users/edz/Documents/Princeton/Senior/ORF411'''
               '''/OJ/not_grapefruit/Results/notgrapefruit2016.xlsm''')
 
+print 'Initializing...'
+start = time.time()
 storages, processing_plants, groves, markets, decisions = initialize(input_file)
+print 'Initialization took {0}'.format(time.time() - start)
 
-processes = []
-deliveries = []
-
-sales = {'ORA': 0, 'POJ': 0, 'ROJ': 0, 'FCOJ': 0}
 # Can easily modify the below to be week by week
+sales = {'ORA': 0, 'POJ': 0, 'ROJ': 0, 'FCOJ': 0}
+revenues = {'ORA': 0, 'POJ': 0, 'ROJ': 0, 'FCOJ': 0}
 cost = {
     'purchase': {
         'raw': 0,
@@ -49,6 +51,10 @@ cost = {
         'tanker': 0
     }
 }
+
+
+processes = []
+deliveries = []
 
 
 # Starts at beginning of week 0
@@ -144,8 +150,36 @@ for t in xrange(0, 49):
         processes.append(new_processes)
         cost['manufacturing']['ROJ (reconstitution)'] += cost
 
-    # Go through Storages / Markets and sell.  Make sure to add to from_storage
-    # costs.
+    # Go through Storages and sell to each of its markets.
+    for storage in storages.values():
+        for product in PRODUCTS:
+            market_demands = [None] * len(storage.markets)
+            market_dists = [None] * len(storage.markets)
+            for i, market_tuple in enumerate(storage.markets):
+                market = market_tuple[0]
+                market_dists[i] = market_tuple[1]
+                market_demands[i] = market.realize_demand(product, t)
+            market_sell = [None] * len(storage.markets)
+            inv = storage.get_total_inventory(product)
+            total_demand = sum(market_demands)
+            # If demand exceeds inventory, sell to the markets proportionally.
+            if total_demand <= inv:
+                market_sell = market_demands
+                storage.remove_product(product, total_demand)
+                sales[product] += total_demand
+            else:
+                market_demands_proportions = [d / total_demand
+                                              for d in market_demands]
+                market_sell = [inv * p
+                               for p in market_demands_proportions]
+                storage.remove_product(product, inv)
+                sales[product] += inv
+            for i, sale in enumerate(market_sell):
+                price = market.prices[product][month_ind]
+                revenue[product] += price * sale
+                cost['transportation']['from_storages'] += (1.2 *
+                                                            market_dists[i] *
+                                                            sale)
 
     # Calculate holding costs.
     for storage in storages.values():
@@ -154,6 +188,60 @@ for t in xrange(0, 49):
 # Add in annual costs
 cost['purchase']['futures']['ORA'] += decisions['futures']['ORA']['total_price']
 cost['purchase']['futures']['FCOJ'] += decisions['futures']['FCOJ']['total_price']
-cost['maintenance']['storage'] += sum([7.5e6 + 650 * s.capacity for s in storages.values()])
-cost['maintenance']['processing'] += sum([8.0e6 + 2500 * s.capacity for s in storages.values()])
-# cost['capacity_change']['storage'] += 
+cost['maintenance']['storage'] += sum([7.5e6 + 650 * s.capacity
+                                       for s in storages.values()])
+cost['maintenance']['processing'] += sum([8.0e6 + 2500 * p.capacity
+                                          for p in processing_plants.values()])
+
+for storage, (old, new) in decisions['capacity']['storage'].iteritems():
+    # Buying capacity (but not a new storage)
+    if old != 0 and new > old:
+        this_cost = 6000 * (new - old)
+
+    # Selling capacity (but not an entire storage)
+    elif old > new:
+        this_cost = .8 * 6000 * (new - old)
+
+    # Selling an entire storage
+    elif old > new and new == 0:
+        this_cost = .8 * (9.0e6 + 6000 * (new - old))
+
+    # Buying an entire new storage
+    elif old == 0 and new > old:
+        this_cost = 9.0e6 + 6000 * (new - old)
+
+    # Make sure this is the only other case
+    elif old == 0 == new:
+        this_cost = 0
+
+    cost['capacity_change']['storage'] += this_cost
+
+for plant, (old, new) in decisions['capacity']['processing'].iteritems():
+    # Buying capacity (but not a new plant)
+    if old != 0 and new > old:
+        this_cost = 8000 * (new - old)
+
+    # Selling capacity (but not an entire plant)
+    elif old > new:
+        this_cost = .7 * 8000 * (new - old)
+
+    # Selling an entire plant
+    elif old > new and new == 0:
+        this_cost = .7 * (12.0e6 + 8000 * (new - old))
+
+    # Buying an entire new plant
+    elif old == 0 and new > old:
+        this_cost = 12.0e6 + 8000 * (new - old)
+
+    # Make sure this is the only other case
+    elif old == 0 == new:
+        this_cost = 0
+
+    print this_cost
+    cost['capacity_change']['processing'] += this_cost
+
+for plant, (old, new) in decisions['capacity']['tankers'].iteritems():
+    if new > old:
+        cost['capacity_change']['tanker'] += 100000 * (new - old)
+    else:
+        cost['capacity_change']['tanker'] -= .6 * 100000 * (old - new)
