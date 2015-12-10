@@ -44,7 +44,7 @@ class Storage(object):
         self.inventory = inventory
 
     def reconstitute(t):
-        recon_percentage = self.reconstitution_percentages[t]
+        recon_percentage = self.reconstitution_percentages[t - 1]
         fcoj_inventory = sum(self.inventory['FCOJ'])
         amount_to_recon = recon_percentage * fcoj_inventory
 
@@ -60,48 +60,63 @@ class Storage(object):
         if shortage <= 0:
             return
         else:
+            products = ['ORA', 'POJ', 'ROJ', 'FCOJ']
+
             # indices to be used to check inventory amount
             indices = [3, 7, 11, 47]
 
             amount_to_remove = shortage
             while amount_to_remove > 0:
+
                 # Calculate weekly inventories for each product
-                weekly_inventories = [self.inventory['ORA'][indices[0]],
-                                      self.inventory['POJ'][indices[1]],
-                                      self.inventory['ROJ'][indices[2]],
-                                      self.inventory['FCOJ'][indices[3]]]
+                weekly_inventories = []
+                available_products = []
+                zipped = zip(indices, products)
+
+                for i, product in zipped:
+                    # Each index needs to be at least 0 for disposal to occur
+                    if i >= 0:
+                        weekly_inventories.append(self.inventory[product][i])
+                        available_products.append(product)
+
+                zipped2 = zip(weekly_inventories, available_products)
 
                 week_total = sum(weekly_inventories)
-                if week_total < amount_remove:
-                    self.remove_product('ORA', weekly_inventories[0])
-                    self.remove_product('POJ', weekly_inventories[1])
-                    self.remove_product('ROJ', weekly_inventories[2])
-                    self.remove_product('FCOJ', weekly_inventories[3])
-
+                if week_total < amount_to_remove:
+                    for amount, product in zipped2:
+                        self.remove_product(product, amount)
 
                 else:
                     # Calculate proportion to remove for each product
                     p = amount_to_remove/week_total
 
-                    self.remove_product('ORA', weekly_inventories[0]*p)
-                    self.remove_product('POJ', weekly_inventories[1]*p)
-                    self.remove_product('ROJ', weekly_inventories[2]*p)
-                    self.remove_product('FCOJ', weekly_inventories[3]*p)
+                    for amount, product in zipped2:
+                        self.remove_product(product, amount * p)
 
                 amount_to_remove -= week_total
                 indices = [i - 1 for i in indices]
 
             return
     def age():
-        pass
+        for vals in self.inventory.values():
+            for i in range(len(vals)):
+                vals[i + 1] = vals[i]
+            vals[0] = 0
+        return
 
     def add_product(product, amount):
-        pass
+        self.inventory[product][0] += amount
+
+        return
 
     def remove_product(product, amount):
         if amount == 0:
             return
-        pass
+        else:
+            amount_to_remove = amount
+            # while amount_to_remove > 0:
+
+        return
 
     def get_total_inventory(product=None):
         if product is None:
