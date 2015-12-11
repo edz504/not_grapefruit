@@ -135,10 +135,12 @@ def initialize(input_file):
                                  Range('shipping_manufacturing',
                                        'C{0}:J{0}'.format(6 + i)).value))
         # TODO (Eddie): Read in these stats from belief.
+
         price_stats = [(0.7, 0.2) for i in xrange(0, 12)]
         harvest_stats = [(25000, 1000) for i in xrange(0, 12)]
         groves[grove_name] = Grove(name=grove_name,
                                    price_stats=price_stats,
+                                   exchange_stats=exchange_stats,
                                    harvest_stats=harvest_stats,
                                    desired_quantities=desired_quantities,
                                    multipliers=multipliers,

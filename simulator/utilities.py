@@ -96,10 +96,11 @@ class ProcessingPlant(object):
 
 class Grove(object):
 
-    def __init__(self, name, price_stats, harvest_stats, desired_quantities,
-                 multipliers, shipping_plan):
+    def __init__(self, name, price_stats, exchange_stats, harvest_stats,
+                 desired_quantities, multipliers, shipping_plan):
         self.name = name
         self.price_stats = price_stats
+        self.exchange_stats = exchange_stats
         self.harvest_stats = harvest_stats
         self.desired_quantities = desired_quantities
         self.multipliers = multipliers
