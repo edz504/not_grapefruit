@@ -126,6 +126,20 @@ def initialize(input_file):
     # in these objects)
     groves = {}
     location_names = Range('shipping_manufacturing', 'C5:J5').value
+
+    raw_price_beliefs_mean = pd.read_csv(os.path.join(ROOT_DIR, 
+        'grove_beliefs/raw_price_beliefs_mean.csv'))
+    raw_price_beliefs_std = pd.read_csv(os.path.join(ROOT_DIR, 
+        'grove_beliefs/raw_price_beliefs_std.csv'))
+    exchange_rate_beliefs_mean = pd.read_csv(os.path.join(ROOT_DIR, 
+        'grove_beliefs/exchange_rate_beliefs_mean.csv'))
+    exchange_rate_beliefs_std = pd.read_csv(os.path.join(ROOT_DIR, 
+        'grove_beliefs/exchange_rate_beliefs_std.csv'))
+    quantity_beliefs_mean = pd.read_csv(os.path.join(ROOT_DIR, 
+        'grove_beliefs/quantity_beliefs_mean.csv'))
+    quantity_beliefs_std = pd.read_csv(os.path.join(ROOT_DIR, 
+        'grove_beliefs/quantity_beliefs_std.csv'))
+
     for i, grove_name in enumerate(Range('raw_materials', 'B6:B11').value):
         desired_quantities = Range('raw_materials',
                                    'C{0}:N{0}'.format(6 + i)).value
@@ -135,9 +149,38 @@ def initialize(input_file):
                                  Range('shipping_manufacturing',
                                        'C{0}:J{0}'.format(6 + i)).value))
         # TODO (Eddie): Read in these stats from belief.
-
-        price_stats = [(0.7, 0.2) for i in xrange(0, 12)]
-        harvest_stats = [(25000, 1000) for i in xrange(0, 12)]
+        price_stats = [None] * 12
+        exchange_stats = [None] * 12
+        harvest_stats = [None] * 12
+        for j, month in enumerate(MONTHS):
+            price_stats[j] = (
+                float(raw_price_beliefs_mean.loc[
+                    (raw_price_beliefs_mean['month'] == month) &
+                    (raw_price_beliefs_mean['grove'] == grove_name)]['price']),
+                float(raw_price_beliefs_std.loc[
+                    (raw_price_beliefs_std['month'] == month) &
+                    (raw_price_beliefs_std['grove'] == grove_name)]['price']))
+            if grove_name in ['BRA', 'SPA']:
+                if grove_name == 'BRA':
+                    foreign = 'BRA Real'
+                else:
+                    foreign = 'SPA Euro'
+                exchange_stats[j] = (
+                    float(exchange_rate_beliefs_mean.loc[
+                        (exchange_rate_beliefs_mean['month'] == month) &
+                        (exchange_rate_beliefs_mean['foreign'] == foreign)]['rate']),
+                    float(exchange_rate_beliefs_std.loc[
+                        (exchange_rate_beliefs_std['month'] == month) &
+                        (exchange_rate_beliefs_std['foreign'] == foreign)]['rate']))
+            else:
+                exchange_stats[j] = (None, None)
+            harvest_stats[j] = (
+                float(quantity_beliefs_mean.loc[
+                    (quantity_beliefs_mean['month'] == month) &
+                    (quantity_beliefs_mean['grove'] == grove_name)]['quantity']),
+                float(quantity_beliefs_std.loc[
+                    (quantity_beliefs_std['month'] == month) &
+                    (quantity_beliefs_std['grove'] == grove_name)]['quantity']))
         groves[grove_name] = Grove(name=grove_name,
                                    price_stats=price_stats,
                                    exchange_stats=exchange_stats,

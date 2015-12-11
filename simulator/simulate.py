@@ -18,6 +18,7 @@ start = time.time()
 storages, processing_plants, groves, markets, decisions = initialize(input_file)
 print 'Initialization took {0}'.format(time.time() - start)
 
+
 # Can easily modify the below to be week by week
 sales = {'ORA': 0, 'POJ': 0, 'ROJ': 0, 'FCOJ': 0}
 revenues = {'ORA': 0, 'POJ': 0, 'ROJ': 0, 'FCOJ': 0}

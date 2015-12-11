@@ -4,7 +4,8 @@
 ### Constants
 PRODUCTS = ['ORA', 'POJ', 'ROJ', 'FCOJ']
 REGIONS = ['NE', 'MA', 'SE', 'MW', 'DS', 'NW', 'SW']
-
+MONTHS = ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+          'Jul', 'Aug']
 
 ### Classes 
 class Delivery(object):
