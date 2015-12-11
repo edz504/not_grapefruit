@@ -1,0 +1,1234 @@
+Sub TransposeSales()
+'
+' TransposeSales Macro
+'
+
+'
+
+    Application.ScreenUpdating = False
+    Sheets("INPUT 1 Sales").Select
+    Range("D109:O109").Select
+    Selection.Copy
+    Sheets("TEMP1").Select
+    Range("A1").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("A1").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 1 Sales").Select
+    Range("D110:O110").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP1").Select
+    Range("A1").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("A13").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 1 Sales").Select
+    Range("D111:O111").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP1").Select
+    Range("A1").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("A25").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 1 Sales").Select
+    Range("D112:O112").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP1").Select
+    Range("A1").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("A37").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 1 Sales").Select
+    Range("D113:O113").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP1").Select
+    Range("A1").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("A49").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 1 Sales").Select
+    Range("D114:O114").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP1").Select
+    Range("A1").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("A61").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 1 Sales").Select
+    Range("D115:O115").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP1").Select
+    Range("A1").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("A73").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("TEMP2").Select
+End Sub
+Sub ClearTEMP2Sheet()
+'
+' ClearTEMP2Sheet Macro
+'
+
+'
+    Sheets("TEMP2").Select
+    Cells.Select
+    Selection.ClearContents
+
+End Sub
+
+Sub ClearTEMP3Sheet()
+'
+' ClearTEMP2Sheet Macro
+'
+
+'
+    Sheets("TEMP3").Select
+    Cells.Select
+    Selection.ClearContents
+
+End Sub
+
+
+Sub ClearTEMP2_runSales_runProduct_runRegion_runPrices()
+'
+'  ClearTEMP2_runSales_runProduct_runRegion_runPrices Macro
+'
+
+'
+    Application.ScreenUpdating = True
+    Application.ScreenUpdating = False
+    Call ClearTEMP2Sheet
+    Call TransposeSales
+    Call TransferProduct
+    Call TransferRegion
+    Call TransferPrices
+    Call Aggregate
+
+    Application.ScreenUpdating = True
+
+
+End Sub
+
+
+Sub TransferRegion()
+'
+' TransferRegion Macro
+'
+
+'
+    Application.ScreenUpdating = False
+    Sheets("INPUT 1 Sales").Select
+    Range("C120").Select
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("C1:C12").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Sheets("INPUT 1 Sales").Select
+    Range("C121").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("C13:C24").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Sheets("INPUT 1 Sales").Select
+    Range("C122").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("C25:C36").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Sheets("INPUT 1 Sales").Select
+    Range("C123").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("C37:C48").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Sheets("INPUT 1 Sales").Select
+    Range("C124").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("C49:C60").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Sheets("INPUT 1 Sales").Select
+    Range("C125").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("C61:C72").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Sheets("INPUT 1 Sales").Select
+    Range("C126").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("C73:C84").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("D84").Select
+End Sub
+Sub TransferProduct()
+'
+' TransferProduct Macro
+'
+
+'
+    Application.ScreenUpdating = False
+    Sheets("BACKEND").Select
+    Range("C2").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("D1:D84").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+End Sub
+
+
+Sub Aggregate()
+'
+' Aggregate Macro
+'
+
+'
+
+    Application.ScreenUpdating = False
+    Dim index As Integer
+    
+    If (Sheets("BACKEND").Cells(2, 3) = "ORA") Then
+        index = 1
+    ElseIf (Sheets("BACKEND").Cells(2, 3) = "POJ") Then
+        index = 2
+    ElseIf (Sheets("BACKEND").Cells(2, 3) = "ROJ") Then
+        index = 3
+    ElseIf (Sheets("BACKEND").Cells(2, 3) = "FCOJ") Then
+        index = 4
+    Else
+    End If
+
+
+
+    If (index = 1) Then
+
+    Sheets("TEMP2").Select
+    Range("A1:D84").Select
+    Selection.Copy
+    Sheets("TEMP3").Select
+    Range("A1").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+    ElseIf (index = 2) Then
+
+    Sheets("TEMP2").Select
+    Range("A1:D84").Select
+    Selection.Copy
+    Sheets("TEMP3").Select
+    Range("A85").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+    ElseIf (index = 3) Then
+
+    Sheets("TEMP2").Select
+    Range("A1:D84").Select
+    Selection.Copy
+    Sheets("TEMP3").Select
+    Range("A169").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+    ElseIf (index = 4) Then
+
+    Sheets("TEMP2").Select
+    Range("A1:D84").Select
+    Selection.Copy
+    Sheets("TEMP3").Select
+    Range("A253").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+    Else
+    End If
+
+
+
+End Sub
+
+
+
+Sub TransferPrices()
+'
+' TransferPrices Macro
+'
+
+'
+    Application.ScreenUpdating = False
+    Dim index As Integer
+    
+    If (Sheets("BACKEND").Cells(2, 3) = "ORA") Then
+        index = 1
+    ElseIf (Sheets("BACKEND").Cells(2, 3) = "POJ") Then
+        index = 2
+    ElseIf (Sheets("BACKEND").Cells(2, 3) = "ROJ") Then
+        index = 3
+    ElseIf (Sheets("BACKEND").Cells(2, 3) = "FCOJ") Then
+        index = 4
+    Else
+    End If
+
+
+    If (index = 1) Then
+
+    Sheets("INPUT 2 Prices").Select
+    Range("D6:O6").Select
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B1").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D7:O7").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B13").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D8:O8").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B25").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D9:O9").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B37").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D10:O10").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B49").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D11:O11").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B61").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D12:O12").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B73").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Range("A1").Select
+
+    ElseIf (index = 2) Then
+
+    Sheets("INPUT 2 Prices").Select
+    Range("D15:O15").Select
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B1").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D16:O16").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B13").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D17:O17").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B25").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D18:O18").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B37").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D19:O19").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B49").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D20:O20").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B61").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D21:O21").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B73").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Range("A1").Select
+
+    ElseIf (index = 3) Then
+
+    Sheets("INPUT 2 Prices").Select
+    Range("D24:O24").Select
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B1").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D25:O25").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B13").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D26:O26").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B25").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D27:O27").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B37").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D28:O28").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B49").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D29:O29").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B61").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D30:O30").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B73").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Range("A1").Select
+
+
+    ElseIf (index = 4) Then
+
+    Sheets("INPUT 2 Prices").Select
+    Range("D33:O33").Select
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B1").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D34:O34").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B13").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D35:O35").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B25").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D36:O36").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B37").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D37:O37").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B49").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D38:O38").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B61").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Sheets("INPUT 2 Prices").Select
+    Range("D39:O39").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP2").Select
+    Range("B73").Select
+    Selection.PasteSpecial paste:=xlAll, Operation:=xlNone, SkipBlanks:=False _
+        , Transpose:=True
+    Range("A1").Select
+
+
+    Else
+    End If
+
+
+
+End Sub
+
+
+Sub Indicator()
+'
+' Indicator Macro
+
+'
+
+'
+    Application.ScreenUpdating = False
+    Dim i As Integer
+    Dim j As Integer
+
+    Dim available1 As Double
+    Dim sold1 As Double
+    Dim available2 As Double
+    Dim sold2 As Double
+    Dim available3 As Double
+    Dim sold3 As Double
+    Dim available4 As Double
+    Dim sold4 As Double
+
+
+    Dim ORA_row_avail As Integer
+    Dim ORA_row_sold As Integer
+    Dim POJ_row_avail As Integer
+    Dim POJ_row_sold As Integer
+    Dim ROJ_row_avail As Integer
+    Dim ROJ_row_sold As Integer
+    Dim FCOJ_row_avail As Integer
+    Dim FCOJ_row_sold As Integer
+
+
+
+
+
+
+
+    Dim backEndMonth As Integer
+
+    Dim indicator1 As Integer
+
+    backEndMonth = 7
+    
+    ORA_row_avail = 175
+    ORA_row_sold = 176
+    POJ_row_avail = 177
+    POJ_row_sold = 178
+    ROJ_row_avail = 179
+    ROJ_row_sold = 180
+    FCOJ_row_avail = 181
+    FCOJ_row_sold = 182
+
+
+
+
+    Sheets("INPUT 3 Storage").Select
+
+' ORA start
+
+
+    i = 4
+    j = 1
+    
+    Do While i < 51
+        available1 = Sheets("INPUT 3 Storage").Cells(ORA_row_avail, i)
+        sold1 = Sheets("INPUT 3 Storage").Cells(ORA_row_sold, i)
+        available2 = Sheets("INPUT 3 Storage").Cells(ORA_row_avail, i + 1)
+        sold2 = Sheets("INPUT 3 Storage").Cells(ORA_row_sold, i + 1)
+        available3 = Sheets("INPUT 3 Storage").Cells(ORA_row_avail, i + 2)
+        sold3 = Sheets("INPUT 3 Storage").Cells(ORA_row_sold, i + 2)
+        available4 = Sheets("INPUT 3 Storage").Cells(ORA_row_avail, i + 3)
+        sold4 = Sheets("INPUT 3 Storage").Cells(ORA_row_sold, i + 3)
+
+
+        If (available1 = sold1) Then
+        Sheets("BACKEND").Cells(j, backEndMonth) = 1
+        ElseIf (available2 = sold2) Then
+        Sheets("BACKEND").Cells(j, backEndMonth) = 1
+        ElseIf (available3 = sold3) Then
+        Sheets("BACKEND").Cells(j, backEndMonth) = 1
+        ElseIf (available4 = sold4) Then
+        Sheets("BACKEND").Cells(j, backEndMonth) = 1
+        Else
+        Sheets("BACKEND").Cells(j, backEndMonth) = 0
+        End If
+
+        i = i + 4
+        j = j + 1
+        
+    Loop
+' ORA end
+
+'POJ start
+
+
+    i = 4
+    j = 14
+    
+    Do While i < 51
+        available1 = Sheets("INPUT 3 Storage").Cells(POJ_row_avail, i)
+        sold1 = Sheets("INPUT 3 Storage").Cells(POJ_row_sold, i)
+        available2 = Sheets("INPUT 3 Storage").Cells(POJ_row_avail, i + 1)
+        sold2 = Sheets("INPUT 3 Storage").Cells(POJ_row_sold, i + 1)
+        available3 = Sheets("INPUT 3 Storage").Cells(POJ_row_avail, i + 2)
+        sold3 = Sheets("INPUT 3 Storage").Cells(POJ_row_sold, i + 2)
+        available4 = Sheets("INPUT 3 Storage").Cells(POJ_row_avail, i + 3)
+        sold4 = Sheets("INPUT 3 Storage").Cells(POJ_row_sold, i + 3)
+
+
+        If (available1 = sold1) Then
+        Sheets("BACKEND").Cells(j, backEndMonth) = 1
+        ElseIf (available2 = sold2) Then
+        Sheets("BACKEND").Cells(j, backEndMonth) = 1
+        ElseIf (available3 = sold3) Then
+        Sheets("BACKEND").Cells(j, backEndMonth) = 1
+        ElseIf (available4 = sold4) Then
+        Sheets("BACKEND").Cells(j, backEndMonth) = 1
+        Else
+        Sheets("BACKEND").Cells(j, backEndMonth) = 0
+        End If
+
+        i = i + 4
+        j = j + 1
+        
+    Loop
+' POJ end
+
+
+
+
+
+' ROJ start
+
+
+    i = 4
+    j = 27
+    
+    Do While i < 51
+        available1 = Sheets("INPUT 3 Storage").Cells(ROJ_row_avail, i)
+        sold1 = Sheets("INPUT 3 Storage").Cells(ROJ_row_sold, i)
+        available2 = Sheets("INPUT 3 Storage").Cells(ROJ_row_avail, i + 1)
+        sold2 = Sheets("INPUT 3 Storage").Cells(ROJ_row_sold, i + 1)
+        available3 = Sheets("INPUT 3 Storage").Cells(ROJ_row_avail, i + 2)
+        sold3 = Sheets("INPUT 3 Storage").Cells(ROJ_row_sold, i + 2)
+        available4 = Sheets("INPUT 3 Storage").Cells(ROJ_row_avail, i + 3)
+        sold4 = Sheets("INPUT 3 Storage").Cells(ROJ_row_sold, i + 3)
+
+
+        If (available1 = sold1) Then
+        Sheets("BACKEND").Cells(j, backEndMonth) = 1
+        ElseIf (available2 = sold2) Then
+        Sheets("BACKEND").Cells(j, backEndMonth) = 1
+        ElseIf (available3 = sold3) Then
+        Sheets("BACKEND").Cells(j, backEndMonth) = 1
+        ElseIf (available4 = sold4) Then
+        Sheets("BACKEND").Cells(j, backEndMonth) = 1
+        Else
+        Sheets("BACKEND").Cells(j, backEndMonth) = 0
+        End If
+
+        i = i + 4
+        j = j + 1
+        
+    Loop
+
+
+' ROJ end
+
+
+
+
+' FCOJ start
+
+
+    i = 4
+    j = 40
+    
+    Do While i < 51
+        available1 = Sheets("INPUT 3 Storage").Cells(FCOJ_row_avail, i)
+        sold1 = Sheets("INPUT 3 Storage").Cells(FCOJ_row_sold, i)
+        available2 = Sheets("INPUT 3 Storage").Cells(FCOJ_row_avail, i + 1)
+        sold2 = Sheets("INPUT 3 Storage").Cells(FCOJ_row_sold, i + 1)
+        available3 = Sheets("INPUT 3 Storage").Cells(FCOJ_row_avail, i + 2)
+        sold3 = Sheets("INPUT 3 Storage").Cells(FCOJ_row_sold, i + 2)
+        available4 = Sheets("INPUT 3 Storage").Cells(FCOJ_row_avail, i + 3)
+        sold4 = Sheets("INPUT 3 Storage").Cells(FCOJ_row_sold, i + 3)
+
+
+        If (available1 = sold1) Then
+        Sheets("BACKEND").Cells(j, backEndMonth) = 1
+        ElseIf (available2 = sold2) Then
+        Sheets("BACKEND").Cells(j, backEndMonth) = 1
+        ElseIf (available3 = sold3) Then
+        Sheets("BACKEND").Cells(j, backEndMonth) = 1
+        ElseIf (available4 = sold4) Then
+        Sheets("BACKEND").Cells(j, backEndMonth) = 1
+        Else
+        Sheets("BACKEND").Cells(j, backEndMonth) = 0
+        End If
+
+        i = i + 4
+        j = j + 1
+        
+    Loop
+
+
+' FCOJ end
+
+
+
+
+
+End Sub
+
+
+
+Sub IndicatorTo84()
+
+    Application.ScreenUpdating = False
+
+
+    Dim storage As String
+    Dim myInput As String
+
+
+    storage = Sheets("BACKEND").Cells(3, 3)
+    myInput = Sheets("BACKEND").Cells(2, 3)
+
+'start for S15
+
+
+
+    If (storage = "S15") Then
+    
+    Sheets("BACKEND").Select
+    Range("G1:G12").Select
+    Selection.Copy
+
+    Range("L49").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("L61").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("L73").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+    
+    Sheets("BACKEND").Select
+    Range("G14:G25").Select
+    Selection.Copy
+
+    Range("P49").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("P61").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("P73").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+    Sheets("BACKEND").Select
+    Range("G27:G38").Select
+    Selection.Copy
+
+    Range("T49").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("T61").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("T73").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+    
+    Sheets("BACKEND").Select
+    Range("G40:G51").Select
+    Selection.Copy
+
+    Range("X49").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("X61").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("X73").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+
+
+' start S61
+
+
+    ElseIf (storage = "S61") Then
+
+    Sheets("BACKEND").Select
+    Range("G1:G12").Select
+    Selection.Copy
+
+    Range("L1").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("L13").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("L25").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("L37").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+
+    Sheets("BACKEND").Select
+    Range("G14:G25").Select
+    Selection.Copy
+
+    Range("P1").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("P13").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("P25").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("P37").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+    Sheets("BACKEND").Select
+    Range("G27:G38").Select
+    Selection.Copy
+
+    Range("T1").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("T13").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("T25").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("T37").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+    Sheets("BACKEND").Select
+    Range("G40:G51").Select
+    Selection.Copy
+
+    Range("X1").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("X13").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("X25").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("X37").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+' start S51
+
+
+
+
+    ElseIf (storage = "S51") Then
+
+    Sheets("BACKEND").Select
+    Range("G1:G12").Select
+    Selection.Copy
+
+    Range("L1").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("L13").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("L25").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+    Sheets("BACKEND").Select
+    Range("G14:G25").Select
+    Selection.Copy
+
+    Range("P1").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("P13").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("P25").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+
+    Sheets("BACKEND").Select
+    Range("G27:G38").Select
+    Selection.Copy
+
+    Range("T1").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("T13").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("T25").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+
+    Sheets("BACKEND").Select
+    Range("G40:G51").Select
+    Selection.Copy
+
+    Range("X1").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("X13").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("X25").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+
+' start S73
+
+
+
+    ElseIf (storage = "S73") Then
+
+    Sheets("BACKEND").Select
+    Range("G1:G12").Select
+    Selection.Copy
+
+    Range("L37").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+
+    Sheets("BACKEND").Select
+    Range("G14:G25").Select
+    Selection.Copy
+
+    Range("P37").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+
+    Sheets("BACKEND").Select
+    Range("G27:G38").Select
+    Selection.Copy
+
+    Range("T37").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+    Sheets("BACKEND").Select
+    Range("G40:G51").Select
+    Selection.Copy
+
+    Range("X37").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+
+
+
+
+
+' start S35
+
+
+
+
+    ElseIf (storage = "S35") Then
+
+    Sheets("BACKEND").Select
+    Range("G1:G12").Select
+    Selection.Copy
+
+    Range("L49").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+    Sheets("BACKEND").Select
+    Range("G14:G25").Select
+    Selection.Copy
+
+    Range("P49").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+    Sheets("BACKEND").Select
+    Range("G27:G38").Select
+    Selection.Copy
+
+    Range("T49").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+
+    Sheets("BACKEND").Select
+    Range("G40:G51").Select
+    Selection.Copy
+
+    Range("X49").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+
+
+
+'start S59
+
+
+    ElseIf (storage = "S59") Then
+
+    Sheets("BACKEND").Select
+    Range("G1:G12").Select
+    Selection.Copy
+
+    Range("L61").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("L73").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+    Sheets("BACKEND").Select
+    Range("G14:G25").Select
+    Selection.Copy
+
+    Range("P61").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("P73").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+    Sheets("BACKEND").Select
+    Range("G27:G38").Select
+    Selection.Copy
+
+    Range("T61").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("T73").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+    Sheets("BACKEND").Select
+    Range("G40:G51").Select
+    Selection.Copy
+
+    Range("X61").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+    Range("X73").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+
+
+    Else
+    End If
+
+
+End Sub
+
+
+Sub paste()
+'
+' paste Macro
+'
+
+'
+    Sheets("BACKEND").Select
+    Range("G1:G12").Select
+    Selection.Copy
+    Range("L49").Select
+    Selection.PasteSpecial paste:=xlValues, Operation:=xlNone, SkipBlanks:= _
+        False, Transpose:=False
+End Sub
+Sub AggIndicators()
+'
+' AggIndicators Macro
+'
+
+'
+    Application.ScreenUpdating = False
+    Sheets("BACKEND").Select
+    Range("L1:L84").Select
+    Selection.Copy
+    Sheets("TEMP1").Select
+    Range("O1").Select
+    ActiveSheet.paste
+    Sheets("BACKEND").Select
+    Range("P1:P84").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP1").Select
+    Range("O85").Select
+    ActiveSheet.paste
+    Sheets("BACKEND").Select
+    Range("T1:T84").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP1").Select
+    Range("O169").Select
+    ActiveSheet.paste
+    Sheets("BACKEND").Select
+    Range("X1:X84").Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("TEMP1").Select
+    Range("O253").Select
+    ActiveSheet.paste
+    Sheets("TEMP1").Select
+    Range("O1").Select
+End Sub
+
+
+Sub Indic_Indic84()
+    Application.ScreenUpdating = False
+    Call Indicator
+    Call IndicatorTo84
+
+End Sub
