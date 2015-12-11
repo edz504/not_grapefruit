@@ -148,7 +148,7 @@ def initialize(input_file):
         shipping_plan = dict(zip(location_names,
                                  Range('shipping_manufacturing',
                                        'C{0}:J{0}'.format(6 + i)).value))
-        # TODO (Eddie): Read in these stats from belief.
+
         price_stats = [None] * 12
         exchange_stats = [None] * 12
         harvest_stats = [None] * 12
