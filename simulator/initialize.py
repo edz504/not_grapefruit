@@ -5,7 +5,45 @@ import sys
 from utilities import *
 from xlwings import Workbook, Range
 
-def initialize(input_file):
+def initialize_inventory(input_file):
+    wb = Workbook(input_file)
+    inv = {}
+    num_storages = int(Range('basic_info', 'D8').value)
+    for i in xrange(0, num_storages):
+        name = Range('basic_info', 'E{0}'.format(10 + i)).value
+        # Inventory before sales
+        this_inv = {
+            'ORA': Range(name, 'AY95:AY98').value,
+            'POJ': Range(name, 'AY100:AY107').value,
+            'ROJ': Range(name, 'AY109:AY120').value,
+            'FCOJ': Range(name, 'AY122:AY169').value
+        }
+        these_sales = {
+            'ORA': Range(name, 'AY176').value,
+            'POJ': Range(name, 'AY178').value,
+            'ROJ': Range(name, 'AY180').value,
+            'FCOJ': Range(name, 'AY182').value
+        }
+        for product, sales in these_sales.iteritems():
+            amount_to_remove = sales
+            i = len(this_inv[product]) - 1
+            # Subtract inventory using sales, priority = age
+            while amount_to_remove > 0 and i >= 0:
+                inventory_this_age = this_inv[product][i]
+                if inventory_this_age > amount_to_remove:
+                    this_inv[product][i] -= amount_to_remove
+                else:
+                    this_inv[product][i]= 0
+
+                amount_to_remove -= inventory_this_age
+                i -= 1
+
+        this_inv['XOJ'] = [0]
+        inv[name] = this_inv
+
+    return inv
+
+def initialize(input_file, initial_inventory):
     # Initialize the markets
     markets = {}
     ROOT_DIR = os.path.dirname(os.getcwd())
@@ -40,10 +78,20 @@ def initialize(input_file):
     # To find the closest storage for each market, we need to retrieve the
     # distance matrix from the static data file, and then initialize the
     # storages.
-    D = pd.DataFrame(np.array(
-        Range('S->M', 'C2:BU101', atleast_2d=True).value))
-    D.columns = Range('S->M', 'C1:BU1').value
-    D.index = Range('S->M', 'B2:B101').value
+    D_sm = pd.DataFrame(np.array(
+        Range('S->M', 'C2:BU101', atleast_2d=True).value),
+                        columns=Range('S->M', 'C1:BU1').value,
+                        index=Range('S->M', 'B2:B101').value)
+    # Also retrieve the other D matrices for Grove and ProcessingPlant shipping
+    # plan values, while we have this workbook open.
+    D_ps = pd.DataFrame(np.array(
+        Range('P->S', 'B2:K72', atleast_2d=True).value),
+                        columns=Range('P->S', 'B1:K1').value,
+                        index=Range('P->S', 'A2:A72').value)
+    D_gps = pd.DataFrame(np.array(
+        Range('G->PS', 'B2:E82', atleast_2d=True).value),
+                         columns=Range('G->PS', 'B1:E1').value,
+                         index=Range('G->PS', 'A2:A82').value)
 
     wb = Workbook(input_file)
     # Initialize Storage Systems
@@ -61,20 +109,15 @@ def initialize(input_file):
             name=name,
             capacity=capacity,
             reconstitution_percentages=reconstitution_percentages,
-            inventory={'ORA': [0] * 4,
-                       'POJ': [0] * 8,
-                       'ROJ': [0] * 12,
-                       'FCOJ': [0] * 48,
-                       'XOJ': [0] * 1
-            }) # TODO (Eddie): Initialize inventory to leftover.
+            inventory=initial_inventory)
 
     # Each key is a storage name, the value is a list of the markets that it
     # will sell to.
     storage_closest_markets = dict(
         zip(all_storage_names,[[] for i in xrange(0, len(all_storage_names))]))
 
-    # Filter out D to only be columns where we have storages open.
-    D_open = D[storages.keys()]
+    # Filter out D_sm to only be columns where we have storages open.
+    D_open = D_sm[storages.keys()]
     for market_name, market in markets.iteritems():
         dists = D_open.loc[market_name, :]
         min_dist = min(dists)
@@ -99,24 +142,23 @@ def initialize(input_file):
         capacity = processing_capacities[index]
         poj_proportion = Range('shipping_manufacturing', (19, 3 + 2 * i)).value
         tanker_car_count = int(tanker_car_counts[index])
+        dists = D_ps.loc[storage_names, name]
         shipping_plan = {'POJ': dict(zip(storage_names,
-                                         Range('shipping_manufacturing',
-                                               (27, 4 + 2 * i),
-                                               (26 + len(storages), 4 + 2 * i)).value)),
+                                         zip(Range('shipping_manufacturing',
+                                                   (27, 4 + 2 * i),
+                                                   (26 + len(storages), 4 + 2 * i)).value,
+                                             dists))),
                          'FCOJ': dict(zip(storage_names,
-                                         Range('shipping_manufacturing',
-                                               (27, 5 + 2 * i),
-                                               (26 + len(storages), 5 + 2 * i)).value))
+                                         zip(Range('shipping_manufacturing',
+                                                   (27, 5 + 2 * i),
+                                                   (26 + len(storages), 5 + 2 * i)).value,
+                                             dists)))
                          }
         processing_plants[name] = ProcessingPlant(
             name=name,
             capacity=capacity,
             poj_proportion=poj_proportion,
-            inventory={'ORA': [0] * 4,
-                       'POJ': [0] * 8,
-                       'ROJ': [0] * 12,
-                       'FCOJ': [0] * 48,
-            },
+            inventory=[0] * 4,
             tanker_cars={'at_home': tanker_car_count,
                          'going_out': 0,
                          'coming_home': 0},
@@ -145,9 +187,14 @@ def initialize(input_file):
                                    'C{0}:N{0}'.format(6 + i)).value
         multipliers = Range('raw_materials',
                             'C{0}:H{0}'.format(17 + i)).value
+        name_adj = 'FLA'
+        if grove_name not in ['BRA', 'SPA']:
+            name_adj = grove_name
+        dists = D_gps.loc[location_names, name_adj]
         shipping_plan = dict(zip(location_names,
-                                 Range('shipping_manufacturing',
-                                       'C{0}:J{0}'.format(6 + i)).value))
+                                 zip(Range('shipping_manufacturing',
+                                       'C{0}:J{0}'.format(6 + i)).value,
+                                     dists)))
 
         price_stats = [None] * 12
         exchange_stats = [None] * 12

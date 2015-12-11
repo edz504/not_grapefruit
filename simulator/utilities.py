@@ -114,7 +114,7 @@ class Grove(object):
         pass
 
     def apply_multipliers(price, quantity, t):
-        desired_quantity = self.desired_quantities[int(t / 4)]
+        desired_quantity = self.desired_quantities[int((t - 1) / 4)]
 
         if price < self.multipliers['Price 1']:
             return desired_quantity * self.multipliers[0]
@@ -144,3 +144,9 @@ class Market(object):
         pass
 
 
+class TankerCarFleet(object):
+
+    def __init__(self, plant, arrival_time, size):
+        self.plant = plant
+        self.arrival_time = arrival_time
+        self.size = size
