@@ -1,5 +1,5 @@
 '''Contains Class definitions for all objects used in simulate.py'''
-
+import numpy as np
 
 ### Constants
 PRODUCTS = ['ORA', 'POJ', 'ROJ', 'FCOJ']
@@ -79,15 +79,15 @@ class Storage(object):
                 week_total = sum(weekly_inventories)
 
                 if week_total < amount_to_remove:
-                    for amount, product in zip(weekly_inventories, available_products):
-                        self.remove_product(product, amount)
+                    for x, product in zip(weekly_inventories, available_products):
+                        self.remove_product(product, x)
 
                 else:
                     # Calculate proportion to remove for each product
                     p = amount_to_remove/week_total
 
-                    for amount, product in zip(weekly_inventories, available_products):
-                        self.remove_product(product, amount * p)
+                    for x, product in zip(weekly_inventories, available_products):
+                        self.remove_product(product, x * p)
 
                 amount_to_remove -= week_total
                 indices = [i - 1 for i in indices]
@@ -114,14 +114,14 @@ class Storage(object):
 
             # Check weekly inventory starting with final week
             while amount_to_remove > 0 and i >= 0:
-                inventory_this_week = inventory[product][i]
-                if inventory_this_week > amount_to_remove:
+                inventory_this_age = inventory[product][i]
+                if inventory_this_age > amount_to_remove:
                     inventory[product][i] -= amount_to_remove
                 else:
                     inventory[product][i] = 0
 
                 # Should work for this loop, but calculation could be better
-                amount_to_remove -= inventory_this_week
+                amount_to_remove -= inventory_this_age
                 i -= 1
 
         return
@@ -145,23 +145,73 @@ class ProcessingPlant(object):
         self.shipping_plan = shipping_plan
 
     def manufacture(t):
-        pass
+        ORA_inventory = self.get_total_inventory()
+        p = self.poj_proportion / 100.0
+
+        # For manufacturing breakdown
+        U = np.random.uniform()
+
+        if U < 0.95:
+            amount_poj = p*ORA_inventory
+            amount_fcoj = (1-p)*ORA_inventory
+            process_poj = Process(self, t+1, 'ORA', 'POJ', amount_poj)
+            process_fcoj = Process(self, t+1, 'ORA', 'FCOJ', amount_fcoj)
+
+            cost_poj = 2000*amount_poj
+            cost_fcoj = 1000*amount_fcoj
+
+            return ([process_poj, process_fcoj], cost_poj, cost_fcoj)
+        
+        else:
+            return ([], 0, 0)
 
     def dispose_capacity(shortage):
-        pass
+        if shortage <= 0:
+            return
+        else:
+            self.remove_product('ORA', shortage)
+            return
+
 
     def age():
-        pass
+        for i in range(4):
+            self.inventory[i + 1] = vals[i]
+        self.inventory[0] = 0
+        
+        return
 
     def add_product(product, amount):
-        pass
+        if product not 'ORA':
+            raise ValueError()
+        else:
+            self.inventory[product][0] += amount
+        return
 
     def remove_product(product, amount):
-        pass
+        if product not 'ORA':
+            raise ValueError()
+        else:
+            amount_to_remove = amount
+            i = 3
+
+            # Check weekly inventory starting with final week
+            while amount_to_remove > 0 and i >= 0:
+                inventory_this_age = inventory[i]
+                if inventory_this_age > amount_to_remove:
+                    inventory[i] -= amount_to_remove
+                else:
+                    inventory[i] = 0
+
+                # Should work for this loop, but calculation could be better
+                amount_to_remove -= inventory_this_age
+                i -= 1
+        return
 
     def get_total_inventory(product=None):
-        return sum([sum(vals) for vals in self.inventory.values()])
+        if product not ('ORA' or None):
+            raise ValueError()
 
+        return sum(self.inventory)
 
 class Grove(object):
 
