@@ -44,7 +44,7 @@ class Storage(object):
         self.inventory = inventory
 
     def reconstitute(t):
-        recon_percentage = self.reconstitution_percentages[t - 1]
+        recon_percentage = self.reconstitution_percentages[(t - 1)/4]
         fcoj_inventory = sum(self.inventory['FCOJ'])
         amount_to_recon = recon_percentage * fcoj_inventory
 
@@ -60,8 +60,6 @@ class Storage(object):
         if shortage <= 0:
             return
         else:
-            products = ['ORA', 'POJ', 'ROJ', 'FCOJ']
-
             # indices to be used to check inventory amount
             indices = [3, 7, 11, 47]
 
@@ -71,26 +69,24 @@ class Storage(object):
                 # Calculate weekly inventories for each product
                 weekly_inventories = []
                 available_products = []
-                zipped = zip(indices, products)
 
-                for i, product in zipped:
+                for i, product in zip(indices, PRODUCTS):
                     # Each index needs to be at least 0 for disposal to occur
                     if i >= 0:
                         weekly_inventories.append(self.inventory[product][i])
                         available_products.append(product)
 
-                zipped2 = zip(weekly_inventories, available_products)
-
                 week_total = sum(weekly_inventories)
+
                 if week_total < amount_to_remove:
-                    for amount, product in zipped2:
+                    for amount, product in zip(weekly_inventories, available_products):
                         self.remove_product(product, amount)
 
                 else:
                     # Calculate proportion to remove for each product
                     p = amount_to_remove/week_total
 
-                    for amount, product in zipped2:
+                    for amount, product in zip(weekly_inventories, available_products):
                         self.remove_product(product, amount * p)
 
                 amount_to_remove -= week_total
@@ -114,7 +110,19 @@ class Storage(object):
             return
         else:
             amount_to_remove = amount
-            # while amount_to_remove > 0:
+            i = len(inventory[product]) - 1
+
+            # Check weekly inventory starting with final week
+            while amount_to_remove > 0 and i >= 0:
+                inventory_this_week = inventory[product][i]
+                if inventory_this_week > amount_to_remove:
+                    inventory[product][i] -= amount_to_remove
+                else:
+                    inventory[product][i] = 0
+
+                # Should work for this loop, but calculation could be better
+                amount_to_remove -= inventory_this_week
+                i -= 1
 
         return
 
