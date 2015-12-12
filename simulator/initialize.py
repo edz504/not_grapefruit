@@ -51,6 +51,9 @@ def initialize(input_file, initial_inventory):
         os.path.join(ROOT_DIR,'reference/StaticData-mod.xlsx'))
     market_names = Range(
         'S->M', 'A2:B101', atleast_2d=True).value
+    demand_coef_df = pd.read_csv(
+        os.path.join(ROOT_DIR,
+                     'demand_pipeline/demand_fit_coefs.csv'))
     for val in market_names:
         name = val[1]
         region = val[0]
@@ -65,15 +68,14 @@ def initialize(input_file, initial_inventory):
                 33 + REGIONS.index(region))).value
         }
 
-        # TODO (Eddie): read in real demand coefficient beliefs later
-        coefs = [(1000, -20), (1000, -20), (1000, -20), (1000, -20)]
-        # TODO (Eddie): read in real demand variance beliefs later
-        stats = [10, 10, 10, 10]
+        region_demands = demand_coef_df[demand_coef_df['region'] == region]
+        coefs = dict(zip(region_demands['product'],
+                     zip(region_demands['a'],
+                         region_demands['b'])))
         markets[name] = Market(name=name,
                                region=region,
                                prices=prices,
-                               demand_function_coefs=coefs,
-                               demand_stats=stats)
+                               demand_function_coefs=coefs)
 
     # To find the closest storage for each market, we need to retrieve the
     # distance matrix from the static data file, and then initialize the

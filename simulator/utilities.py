@@ -132,13 +132,11 @@ class Grove(object):
 
 class Market(object):
 
-    def __init__(self, name, region, prices, demand_function_coefs,
-                 demand_stats):
+    def __init__(self, name, region, prices, demand_function_coefs):
         self.name = name
         self.region = region
         self.prices = prices
         self.demand_function_coefs = demand_function_coefs
-        self.demand_stats = demand_stats
 
     def realize_demand(product, t):
         pass
