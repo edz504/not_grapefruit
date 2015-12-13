@@ -49,7 +49,7 @@ class Storage(object):
     def reconstitute(self, t):
         recon_percentage = self.reconstitution_percentages[(t - 1) / 4]
         fcoj_inventory = self.get_total_inventory('FCOJ')
-        amount_to_recon = recon_percentage * fcoj_inventory
+        amount_to_recon = (recon_percentage / 100.) * fcoj_inventory
 
         self.remove_product('FCOJ', amount_to_recon)
         self.add_product('XOJ', amount_to_recon)
@@ -97,10 +97,11 @@ class Storage(object):
 
             return
 
-    def age(self, ):
+    def age(self):
         for vals in self.inventory.values():
+            old_vals = list(vals)
             for i in range(len(vals) - 1): # -1 takes care of rotting
-                vals[i + 1] = vals[i]
+                vals[i + 1] = old_vals[i]
             vals[0] = 0
         return
 
@@ -113,15 +114,15 @@ class Storage(object):
             return
         else:
             amount_to_remove = amount
-            i = len(inventory[product]) - 1
+            i = len(self.inventory[product]) - 1
 
             # Check weekly inventory starting with final week
             while amount_to_remove > 0 and i >= 0:
-                inventory_this_age = inventory[product][i]
+                inventory_this_age = self.inventory[product][i]
                 if inventory_this_age > amount_to_remove:
-                    inventory[product][i] -= amount_to_remove
+                    self.inventory[product][i] -= amount_to_remove
                 else:
-                    inventory[product][i] = 0
+                    self.inventory[product][i] = 0
 
                 # Should work for this loop, but calculation could be better
                 amount_to_remove -= inventory_this_age
@@ -149,6 +150,10 @@ class ProcessingPlant(object):
 
     def manufacture(self, t):
         ORA_inventory = self.get_total_inventory()
+        # No point in creating 0-amount inventories if there is no ORA.
+        if ORA_inventory == 0:
+            return ([], 0, 0)
+
         p = self.poj_proportion / 100.0
 
         # For manufacturing breakdown
@@ -166,6 +171,7 @@ class ProcessingPlant(object):
             return ([process_poj, process_fcoj], cost_poj, cost_fcoj)
         
         else:
+            print 'Breakdown of {0} at time {1}'.format(self.name, t)
             return ([], 0, 0)
 
     def dispose_capacity(self, shortage):
@@ -176,9 +182,10 @@ class ProcessingPlant(object):
             return
 
 
-    def age(self, ):
+    def age(self):
+        old_inv = list(self.inventory)
         for i in range(3): # 3 not 4 to deal with rotting
-            self.inventory[i + 1] = vals[i]
+            self.inventory[i + 1] = old_inv[i]
         self.inventory[0] = 0
         return
 
@@ -198,11 +205,11 @@ class ProcessingPlant(object):
 
             # Check weekly inventory starting with final week
             while amount_to_remove > 0 and i >= 0:
-                inventory_this_age = inventory[i]
+                inventory_this_age = self.inventory[i]
                 if inventory_this_age > amount_to_remove:
-                    inventory[i] -= amount_to_remove
+                    self.inventory[i] -= amount_to_remove
                 else:
-                    inventory[i] = 0
+                    self.inventory[i] = 0
 
                 # Should work for this loop, but calculation could be better
                 amount_to_remove -= inventory_this_age

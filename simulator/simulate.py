@@ -67,8 +67,8 @@ processes = []
 deliveries = []
 tanker_car_fleets = []
 
-# Starts at beginning of week 0
-for t in xrange(1, 49):
+# Starts at beginning of week 1
+for t in xrange(1, 2):
     month_ind = int((t - 1) / 4)
 
     # Age all storages and processing plants.
@@ -108,7 +108,7 @@ for t in xrange(1, 49):
             else:
                 raise ValueError('Process must start with ORA or FCOJ')
 
-    # Go through each plant now that we know how much product its finished
+    # Go through each plant now that we know how much product it has finished
     # processing.
     for plant_name, total_product in total_product_by_plant.iteritems():
         if total_product == 0:
@@ -208,8 +208,6 @@ for t in xrange(1, 49):
         processes += new_processes
         cost['manufacturing']['POJ'] += cost_poj
         cost['manufacturing']['FCOJ'] += cost_fcoj
-
-        # Add tanker car holding costs
 
     # Go through Storages and reconstitute (create Processes), using the XOJ.
     for storage in storages.values():
