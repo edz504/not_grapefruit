@@ -46,8 +46,8 @@ class Storage(object):
         self.inventory = inventory
         self.markets = markets
 
-    def reconstitute(t):
-        recon_percentage = self.reconstitution_percentages[(t - 1)/4]
+    def reconstitute(self, t):
+        recon_percentage = self.reconstitution_percentages[(t - 1) / 4]
         fcoj_inventory = self.get_total_inventory('FCOJ')
         amount_to_recon = recon_percentage * fcoj_inventory
 
@@ -59,7 +59,7 @@ class Storage(object):
 
         return ([recon_process], recon_cost)
 
-    def dispose_capacity(shortage):
+    def dispose_capacity(self, shortage):
         if shortage <= 0:
             return
         else:
@@ -97,18 +97,18 @@ class Storage(object):
 
             return
 
-    def age():
+    def age(self, ):
         for vals in self.inventory.values():
             for i in range(len(vals) - 1): # -1 takes care of rotting
                 vals[i + 1] = vals[i]
             vals[0] = 0
         return
 
-    def add_product(product, amount):
+    def add_product(self, product, amount):
         self.inventory[product][0] += amount
         return
 
-    def remove_product(product, amount):
+    def remove_product(self, product, amount):
         if amount == 0:
             return
         else:
@@ -129,7 +129,7 @@ class Storage(object):
 
         return
 
-    def get_total_inventory(product=None):
+    def get_total_inventory(self, product=None):
         if product is None:
             return sum([sum(vals) for vals in self.inventory.values()])
         else:
@@ -147,7 +147,7 @@ class ProcessingPlant(object):
         self.tanker_cars = tanker_cars
         self.shipping_plan = shipping_plan
 
-    def manufacture(t):
+    def manufacture(self, t):
         ORA_inventory = self.get_total_inventory()
         p = self.poj_proportion / 100.0
 
@@ -168,7 +168,7 @@ class ProcessingPlant(object):
         else:
             return ([], 0, 0)
 
-    def dispose_capacity(shortage):
+    def dispose_capacity(self, shortage):
         if shortage <= 0:
             return
         else:
@@ -176,22 +176,22 @@ class ProcessingPlant(object):
             return
 
 
-    def age():
+    def age(self, ):
         for i in range(3): # 3 not 4 to deal with rotting
             self.inventory[i + 1] = vals[i]
         self.inventory[0] = 0
         return
 
-    def add_product(product, amount):
-        if product not 'ORA':
-            raise ValueError()
+    def add_product(self, product, amount):
+        if product != 'ORA':
+            raise ValueError('Can only add ORA to processing inventory')
         else:
-            self.inventory[product][0] += amount
+            self.inventory[0] += amount
         return
 
-    def remove_product(product, amount):
-        if product not 'ORA':
-            raise ValueError()
+    def remove_product(self, product, amount):
+        if product != 'ORA':
+            raise ValueError('Can only remove ORA from processing inventory')
         else:
             amount_to_remove = amount
             i = 3
@@ -209,8 +209,8 @@ class ProcessingPlant(object):
                 i -= 1
         return
 
-    def get_total_inventory(product=None):
-        if product not ('ORA' or None):
+    def get_total_inventory(self, product=None):
+        if (product != 'ORA') and (product is not None):
             raise ValueError(
                 'There should only be ORA in processing inventories.')
 
@@ -228,13 +228,13 @@ class Grove(object):
         self.multipliers = multipliers
         self.shipping_plan = shipping_plan
 
-    def realize_price_month(month_index):
+    def realize_price_month(self, month_index):
         pass
 
-    def realize_week_harvest(week):
+    def realize_week_harvest(self, week):
         pass
 
-    def apply_multipliers(price, quantity, t):
+    def apply_multipliers(self, price, quantity, t):
         desired_quantity = self.desired_quantities[int((t - 1) / 4)]
 
         if price < self.multipliers['Price 1']:
@@ -246,7 +246,7 @@ class Grove(object):
         else:
             return 0
 
-    def spot_purchase(t):
+    def spot_purchase(self, t):
         pass
 
 
@@ -259,8 +259,14 @@ class Market(object):
         self.prices = prices
         self.demand_function_coefs = demand_function_coefs
 
-    def realize_demand(product, t):
-        pass
+    def realize_demand(self, product, t):
+        these_coefs = self.demand_function_coefs[product]
+        a = these_coefs[0]
+        b = these_coefs[1]
+        price = self.prices[product][int((t - 1) / 4)]
+        expected_demand = a / (price ** 2) + b
+        return np.random.normal(loc=expected_demand,
+                                scale=0.1 * expected_demand)
 
 
 class TankerCarFleet(object):
