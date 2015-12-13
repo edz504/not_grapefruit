@@ -99,14 +99,13 @@ class Storage(object):
 
     def age():
         for vals in self.inventory.values():
-            for i in range(len(vals)):
+            for i in range(len(vals) - 1): # -1 takes care of rotting
                 vals[i + 1] = vals[i]
             vals[0] = 0
         return
 
     def add_product(product, amount):
         self.inventory[product][0] += amount
-
         return
 
     def remove_product(product, amount):
@@ -178,10 +177,9 @@ class ProcessingPlant(object):
 
 
     def age():
-        for i in range(4):
+        for i in range(3): # 3 not 4 to deal with rotting
             self.inventory[i + 1] = vals[i]
         self.inventory[0] = 0
-        
         return
 
     def add_product(product, amount):
@@ -213,7 +211,8 @@ class ProcessingPlant(object):
 
     def get_total_inventory(product=None):
         if product not ('ORA' or None):
-            raise ValueError()
+            raise ValueError(
+                'There should only be ORA in processing inventories.')
 
         return sum(self.inventory)
 
