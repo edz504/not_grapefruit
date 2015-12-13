@@ -4,7 +4,8 @@ import numpy as np
 ### Constants
 PRODUCTS = ['ORA', 'POJ', 'ROJ', 'FCOJ']
 REGIONS = ['NE', 'MA', 'SE', 'MW', 'DS', 'NW', 'SW']
-
+MONTHS = ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+          'Jul', 'Aug']
 
 ### Classes 
 class Delivery(object):
@@ -37,15 +38,17 @@ class Process(object):
 
 class Storage(object):
 
-    def __init__(self, name, capacity, reconstitution_percentages, inventory):
+    def __init__(self, name, capacity, reconstitution_percentages, inventory,
+                 markets=None): # in sim, market provided after creation
         self.name = name
         self.capacity = capacity
         self.reconstitution_percentages = reconstitution_percentages
         self.inventory = inventory
+        self.markets = markets
 
     def reconstitute(t):
         recon_percentage = self.reconstitution_percentages[(t - 1)/4]
-        fcoj_inventory = sum(self.inventory['FCOJ'])
+        fcoj_inventory = self.get_total_inventory('FCOJ')
         amount_to_recon = recon_percentage * fcoj_inventory
 
         self.remove_product('FCOJ', amount_to_recon)
@@ -54,7 +57,7 @@ class Storage(object):
         recon_process = Process(self, t + 1, 'FCOJ', 'ROJ', amount_to_recon)
         recon_cost = 650 * amount_to_recon
 
-        return (recon_process, recon_cost)
+        return ([recon_process], recon_cost)
 
     def dispose_capacity(shortage):
         if shortage <= 0:
@@ -93,6 +96,7 @@ class Storage(object):
                 indices = [i - 1 for i in indices]
 
             return
+
     def age():
         for vals in self.inventory.values():
             for i in range(len(vals)):
@@ -152,13 +156,13 @@ class ProcessingPlant(object):
         U = np.random.uniform()
 
         if U < 0.95:
-            amount_poj = p*ORA_inventory
-            amount_fcoj = (1-p)*ORA_inventory
-            process_poj = Process(self, t+1, 'ORA', 'POJ', amount_poj)
-            process_fcoj = Process(self, t+1, 'ORA', 'FCOJ', amount_fcoj)
+            amount_poj = p * ORA_inventory
+            amount_fcoj = (1 - p) * ORA_inventory
+            process_poj = Process(self, t + 1, 'ORA', 'POJ', amount_poj)
+            process_fcoj = Process(self, t + 1, 'ORA', 'FCOJ', amount_fcoj)
 
-            cost_poj = 2000*amount_poj
-            cost_fcoj = 1000*amount_fcoj
+            cost_poj = 2000 * amount_poj
+            cost_fcoj = 1000 * amount_fcoj
 
             return ([process_poj, process_fcoj], cost_poj, cost_fcoj)
         
@@ -215,10 +219,11 @@ class ProcessingPlant(object):
 
 class Grove(object):
 
-    def __init__(self, name, price_stats, harvest_stats, desired_quantities,
-                 multipliers, shipping_plan):
+    def __init__(self, name, price_stats, exchange_stats, harvest_stats,
+                 desired_quantities, multipliers, shipping_plan):
         self.name = name
         self.price_stats = price_stats
+        self.exchange_stats = exchange_stats
         self.harvest_stats = harvest_stats
         self.desired_quantities = desired_quantities
         self.multipliers = multipliers
@@ -247,7 +252,7 @@ class Grove(object):
         return harvest
 
     def apply_multipliers(price, t):
-        desired_quantity = self.desired_quantities[int(t / 4)]
+        desired_quantity = self.desired_quantities[int((t - 1) / 4)]
 
         if price < self.multipliers['Price 1']:
             return desired_quantity * self.multipliers[0]
@@ -283,15 +288,19 @@ class Grove(object):
 
 class Market(object):
 
-    def __init__(self, name, region, prices, demand_function_coefs,
-                 demand_stats):
+    def __init__(self, name, region, prices, demand_function_coefs):
         self.name = name
         self.region = region
         self.prices = prices
         self.demand_function_coefs = demand_function_coefs
-        self.demand_stats = demand_stats
 
-    def realize_demand(price, product):
+    def realize_demand(product, t):
         pass
 
 
+class TankerCarFleet(object):
+
+    def __init__(self, plant, arrival_time, size):
+        self.plant = plant
+        self.arrival_time = arrival_time
+        self.size = size
