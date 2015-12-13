@@ -181,14 +181,14 @@ class ProcessingPlant(object):
         return
 
     def add_product(product, amount):
-        if product not 'ORA':
+        if product is not 'ORA':
             raise ValueError()
         else:
             self.inventory[product][0] += amount
         return
 
     def remove_product(product, amount):
-        if product not 'ORA':
+        if product is not 'ORA':
             raise ValueError()
         else:
             amount_to_remove = amount
@@ -225,12 +225,28 @@ class Grove(object):
         self.shipping_plan = shipping_plan
 
     def realize_price_month(month_index):
-        pass
+        if month_index not in range(0, 12):
+            raise ValueError()
 
-    def realize_week_harvest(week):
-        pass
+        mu = self.price_stats[month_index][0]
+        sigma = self.price_stats[month_index][1]
+        price = np.random.normal(mu, sigma)
+        while price < 0:
+            price = np.random.normal(mu, sigma)
+        return price
 
-    def apply_multipliers(price, quantity, t):
+    def realize_week_harvest(week_index):
+        if week_index not in range(0, 48):
+            raise ValueError()
+
+        mu = self.harvest_stats[week_index][0]
+        sigma = self.harvest_stats[week_index][1]
+        harvest = np.random.normal(mu, sigma)
+        while harvest < 0:
+            harvest = np.random.normal(mu, sigma)
+        return harvest
+
+    def apply_multipliers(price, t):
         desired_quantity = self.desired_quantities[int(t / 4)]
 
         if price < self.multipliers['Price 1']:
@@ -243,8 +259,26 @@ class Grove(object):
             return 0
 
     def spot_purchase(t):
-        pass
+        price = self.realize_price_month(int(t / 4))
+        harvest = self.realize_week_harvest(t)
 
+        if self.apply_multipliers(price, t) > harvest:
+            amount_purchased = harvest
+        else:
+            amount_purchased = self.apply_multipliers(price, t)
+
+        deliveries = []
+        raw_cost = price * amount_purchased
+        shipping_cost = 0
+        for key in shipping_plan:
+            p = shipping_plan[key][0]/100.0
+            distance = shipping_plan[key][1]
+
+            deliveries.append(Delivery(self, key, t + 1, 'ORA',
+                                         p * amount_purchased))
+            shipping_cost += 0.22 * p * amount_purchased * distance
+
+        return (deliveries, raw_cost, shipping_cost)
 
 
 class Market(object):
