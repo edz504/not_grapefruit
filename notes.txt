@@ -1,0 +1,34 @@
+Updating pipeline:
+
+- Rerun John's VBA to retrieve all sales data
+    = demand_pipeline/VBA_sales_parse
+
+- Update demand beliefs
+    = demand_pipeline/demand_fit_plot.R
+
+- Look at fitted demand curves for sanity check
+    = demand_pipeline/sales_and_fits_plots/*.png
+
+- Create demand look-up table
+    = demand_pipeline/create_demand_table.R
+
+- Update spot purchase beliefs
+    = grove_beliefs/update_beliefs.py
+
+- Recalculate optimal prices for ORA, POJ, ROJ
+    = demand_pipeline/find_optimal_prices_ORA_POJ_ROJ.R
+    = ROJ is because we use all FCOJ 136k constrained
+
+- Recalculate optimal prices for FCOJ
+    = demand_pipeline/find_optimal_prices_ROJ_FCOJ.R
+    = this informs how much FCOJ futures to order
+
+- Recalculate optimal prices for FCOJ given amount of maturing FCOJ futures is fixed at 136k
+    = we only do this until the quantity becomes ~89k, at which point we start using the pricing / distribution plan given by the optimization in find_optimal_prices_ROJ_FCOJ.R
+    = demand_pipeline/find_optimal_prices_FCOJ_fixed.R
+
+- Recalculate capacity for optimal price's demands and other stuff
+    = probably won't need to change, just a sanity check
+    = demand_pipeline/calculate_decisions.R
+
+

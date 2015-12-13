@@ -1,12 +1,9 @@
 library(ggplot2)
 library(dplyr)
 
-cwd <- getwd()
-setwd('..')
 all.predicted.demands <- read.csv(
     'all_predicted_demands.csv',
     stringsAsFactors=FALSE)
-setwd(cwd)
 
 
 # FCOJ
@@ -58,11 +55,13 @@ ggplot(fcoj.df, aes(x=price, y=profit, colour=region)) +
     geom_line(aes(y=year1_profit), linetype='dotted') +
     geom_line(aes(y=profit)) +
     ggtitle('FCOJ Futures Profit (Year 1 and After)')
-ggsave('fcoj_futures_profit.png', width=10, height=6)
+ggsave('profit_curves/fcoj_futures_profit.png',
+       width=10, height=6)
 
 fcoj.profit.max <- fcoj.df %>% group_by(region) %>%
     filter(profit == max(profit))
-write.csv(fcoj.profit.max, file='fcoj_futures_max_profit.csv',
+write.csv(fcoj.profit.max,
+          file='profit_csvs/fcoj_futures_max_profit.csv',
           quote=FALSE, row.names=FALSE)
 
 
@@ -117,9 +116,10 @@ ggplot(roj.df, aes(x=price, y=profit, colour=region)) +
     geom_line(aes(y=year1_profit), linetype='dotted') +
     geom_line(aes(y=profit)) +
     ggtitle('ROJ Futures Profit (Year 1 and After)')
-ggsave('roj_futures_profit.png', width=10, height=6)
+ggsave('profit_curves/roj_futures_profit.png', width=10, height=6)
 
 roj.profit.max <- roj.df %>% group_by(region) %>%
     filter(profit == max(profit))
-write.csv(roj.profit.max, file='roj_futures_max_profit.csv',
+write.csv(roj.profit.max,
+          file='profit_csvs/roj_futures_max_profit.csv',
           quote=FALSE, row.names=FALSE)

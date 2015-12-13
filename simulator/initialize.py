@@ -54,6 +54,7 @@ def initialize(input_file, initial_inventory):
     demand_coef_df = pd.read_csv(
         os.path.join(ROOT_DIR,
                      'demand_pipeline/demand_fit_coefs.csv'))
+    wb = Workbook(input_file)
     for val in market_names:
         name = val[1]
         region = val[0]
@@ -80,6 +81,8 @@ def initialize(input_file, initial_inventory):
     # To find the closest storage for each market, we need to retrieve the
     # distance matrix from the static data file, and then initialize the
     # storages.
+    wb = Workbook(
+        os.path.join(ROOT_DIR,'reference/StaticData-mod.xlsx'))
     D_sm = pd.DataFrame(np.array(
         Range('S->M', 'C2:BU101', atleast_2d=True).value),
                         columns=Range('S->M', 'C1:BU1').value,
