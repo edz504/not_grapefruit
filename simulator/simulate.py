@@ -12,13 +12,10 @@ import time
 # Hard-code the file to use.  Note that we can use both the
 # results .xlsm and the original decisions spreadsheet, because
 # the results .xlsm contains the decision sheets.
-input_file = ('''/Users/edz/Documents/Princeton/Senior/ORF411'''
-              '''/OJ/not_grapefruit/Results/notgrapefruit2016.xlsm''')
-
+input_file = ('''/Users/kyun/not_grapefruit/Results/notgrapefruit2016.xlsm''')
 # We also need the Results file of the previous year in order to
 # initialize the inventory.
-last_year_file = ('''/Users/edz/Documents/Princeton/Senior/ORF411'''
-                  '''/OJ/not_grapefruit/Results/notgrapefruit2015.xlsm''')
+last_year_file = ('''/Users/kyun/not_grapefruit/Results/notgrapefruit2015.xlsm''')
 
 print 'Initializing...'
 start = time.time()

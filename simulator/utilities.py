@@ -261,11 +261,11 @@ class Grove(object):
     def apply_multipliers(self, price, t):
         desired_quantity = self.desired_quantities[int((t - 1) / 4)]
 
-        if price < self.multipliers['Price 1']:
+        if price < self.multipliers[1]:
             return desired_quantity * self.multipliers[0]
-        elif price < self.multipliers['Price 2']:
+        elif price < self.multipliers[3]:
             return desired_quantity * self.multipliers[2]
-        elif price < self.multipliers['Price 3']:
+        elif price < self.multipliers[5]:
             return desired_quantity * self.multipliers[4]
         else:
             return 0
@@ -282,9 +282,12 @@ class Grove(object):
         deliveries = []
         raw_cost = price * amount_purchased
         shipping_cost = 0
-        for key in shipping_plan:
-            p = shipping_plan[key][0]/100.0
-            distance = shipping_plan[key][1]
+        for key in self.shipping_plan:
+            if self.shipping_plan[key][0] is None:
+                p = 0.0
+            else:
+                p = self.shipping_plan[key][0]/100.0
+            distance = self.shipping_plan[key][1]
 
             deliveries.append(Delivery(self, key, t + 1, 'ORA',
                                          p * amount_purchased))
