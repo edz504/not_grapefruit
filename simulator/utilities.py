@@ -48,7 +48,7 @@ class Storage(object):
 
     def reconstitute(t):
         recon_percentage = self.reconstitution_percentages[(t - 1)/4]
-        fcoj_inventory = sum(self.inventory['FCOJ'])
+        fcoj_inventory = self.get_total_inventory('FCOJ')
         amount_to_recon = recon_percentage * fcoj_inventory
 
         self.remove_product('FCOJ', amount_to_recon)
@@ -57,7 +57,7 @@ class Storage(object):
         recon_process = Process(self, t + 1, 'FCOJ', 'ROJ', amount_to_recon)
         recon_cost = 650 * amount_to_recon
 
-        return (recon_process, recon_cost)
+        return ([recon_process], recon_cost)
 
     def dispose_capacity(shortage):
         if shortage <= 0:
@@ -96,6 +96,7 @@ class Storage(object):
                 indices = [i - 1 for i in indices]
 
             return
+
     def age():
         for vals in self.inventory.values():
             for i in range(len(vals)):
@@ -155,13 +156,13 @@ class ProcessingPlant(object):
         U = np.random.uniform()
 
         if U < 0.95:
-            amount_poj = p*ORA_inventory
-            amount_fcoj = (1-p)*ORA_inventory
-            process_poj = Process(self, t+1, 'ORA', 'POJ', amount_poj)
-            process_fcoj = Process(self, t+1, 'ORA', 'FCOJ', amount_fcoj)
+            amount_poj = p * ORA_inventory
+            amount_fcoj = (1 - p) * ORA_inventory
+            process_poj = Process(self, t + 1, 'ORA', 'POJ', amount_poj)
+            process_fcoj = Process(self, t + 1, 'ORA', 'FCOJ', amount_fcoj)
 
-            cost_poj = 2000*amount_poj
-            cost_fcoj = 1000*amount_fcoj
+            cost_poj = 2000 * amount_poj
+            cost_fcoj = 1000 * amount_fcoj
 
             return ([process_poj, process_fcoj], cost_poj, cost_fcoj)
         

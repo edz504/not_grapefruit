@@ -213,10 +213,6 @@ for t in xrange(1, 49):
 
     # Go through Storages and reconstitute (create Processes), using the XOJ.
     for storage in storages.values():
-        recon_percent = storage.reconstitution_percentages[month_ind]
-        Y = recon_percent * storage.inventory['FCOJ']
-        storage.remove_product('FCOJ', Y)
-        storage.add_product('XOJ', Y)
         new_processes, cost = storage.reconstitute(t)
         processes.append(new_processes)
         cost['manufacturing']['ROJ (reconstitution)'] += cost
