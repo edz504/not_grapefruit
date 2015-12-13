@@ -107,11 +107,21 @@ def initialize(input_file, initial_inventory):
         capacity = storage_capacities[index]
         reconstitution_percentages = Range(
             'shipping_manufacturing', 'C{0}:N{0}'.format(38 + i)).value
+        if name in initial_inventory.keys():
+            inv = initial_inventory[name]
+        else:
+            inv = {
+                'XOJ': [0],
+                'ORA': [0] * 4,
+                'POJ': [0] * 8,
+                'ROJ': [0] * 12,
+                'FCOJ': [0] * 48
+            }
         storages[name] = Storage(
             name=name,
             capacity=capacity,
             reconstitution_percentages=reconstitution_percentages,
-            inventory=initial_inventory)
+            inventory=inv)
 
     # Each key is a storage name, the value is a list of the markets that it
     # will sell to.

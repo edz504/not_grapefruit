@@ -46,10 +46,10 @@ class Storage(object):
         self.inventory = inventory
         self.markets = markets
 
-    def reconstitute(t):
-        recon_percentage = self.reconstitution_percentages[(t - 1)/4]
+    def reconstitute(self, t):
+        recon_percentage = self.reconstitution_percentages[(t - 1) / 4]
         fcoj_inventory = self.get_total_inventory('FCOJ')
-        amount_to_recon = recon_percentage * fcoj_inventory
+        amount_to_recon = (recon_percentage / 100.) * fcoj_inventory
 
         self.remove_product('FCOJ', amount_to_recon)
         self.add_product('XOJ', amount_to_recon)
@@ -59,7 +59,7 @@ class Storage(object):
 
         return ([recon_process], recon_cost)
 
-    def dispose_capacity(shortage):
+    def dispose_capacity(self, shortage):
         if shortage <= 0:
             return
         else:
@@ -97,32 +97,32 @@ class Storage(object):
 
             return
 
-    def age():
+    def age(self):
         for vals in self.inventory.values():
-            for i in range(len(vals)):
-                vals[i + 1] = vals[i]
+            old_vals = list(vals)
+            for i in range(len(vals) - 1): # -1 takes care of rotting
+                vals[i + 1] = old_vals[i]
             vals[0] = 0
         return
 
-    def add_product(product, amount):
+    def add_product(self, product, amount):
         self.inventory[product][0] += amount
-
         return
 
-    def remove_product(product, amount):
+    def remove_product(self, product, amount):
         if amount == 0:
             return
         else:
             amount_to_remove = amount
-            i = len(inventory[product]) - 1
+            i = len(self.inventory[product]) - 1
 
             # Check weekly inventory starting with final week
             while amount_to_remove > 0 and i >= 0:
-                inventory_this_age = inventory[product][i]
+                inventory_this_age = self.inventory[product][i]
                 if inventory_this_age > amount_to_remove:
-                    inventory[product][i] -= amount_to_remove
+                    self.inventory[product][i] -= amount_to_remove
                 else:
-                    inventory[product][i] = 0
+                    self.inventory[product][i] = 0
 
                 # Should work for this loop, but calculation could be better
                 amount_to_remove -= inventory_this_age
@@ -130,7 +130,7 @@ class Storage(object):
 
         return
 
-    def get_total_inventory(product=None):
+    def get_total_inventory(self, product=None):
         if product is None:
             return sum([sum(vals) for vals in self.inventory.values()])
         else:
@@ -148,8 +148,12 @@ class ProcessingPlant(object):
         self.tanker_cars = tanker_cars
         self.shipping_plan = shipping_plan
 
-    def manufacture(t):
+    def manufacture(self, t):
         ORA_inventory = self.get_total_inventory()
+        # No point in creating 0-amount inventories if there is no ORA.
+        if ORA_inventory == 0:
+            return ([], 0, 0)
+
         p = self.poj_proportion / 100.0
 
         # For manufacturing breakdown
@@ -167,9 +171,10 @@ class ProcessingPlant(object):
             return ([process_poj, process_fcoj], cost_poj, cost_fcoj)
         
         else:
+            print 'Breakdown of {0} at time {1}'.format(self.name, t)
             return ([], 0, 0)
 
-    def dispose_capacity(shortage):
+    def dispose_capacity(self, shortage):
         if shortage <= 0:
             return
         else:
@@ -177,43 +182,45 @@ class ProcessingPlant(object):
             return
 
 
-    def age():
-        for i in range(4):
-            self.inventory[i + 1] = vals[i]
+    def age(self):
+        old_inv = list(self.inventory)
+        for i in range(3): # 3 not 4 to deal with rotting
+            self.inventory[i + 1] = old_inv[i]
         self.inventory[0] = 0
-        
         return
 
-    def add_product(product, amount):
-        if product is not 'ORA':
-            raise ValueError()
+    def add_product(self, product, amount):
+        if product != 'ORA':
+            raise ValueError('Can only add ORA to processing inventory')
         else:
-            self.inventory[product][0] += amount
+            self.inventory[0] += amount
         return
 
-    def remove_product(product, amount):
-        if product is not 'ORA':
-            raise ValueError()
+    def remove_product(self, product, amount):
+        if product != 'ORA':
+            raise ValueError('Can only remove ORA from processing inventory')
+
         else:
             amount_to_remove = amount
             i = 3
 
             # Check weekly inventory starting with final week
             while amount_to_remove > 0 and i >= 0:
-                inventory_this_age = inventory[i]
+                inventory_this_age = self.inventory[i]
                 if inventory_this_age > amount_to_remove:
-                    inventory[i] -= amount_to_remove
+                    self.inventory[i] -= amount_to_remove
                 else:
-                    inventory[i] = 0
+                    self.inventory[i] = 0
 
                 # Should work for this loop, but calculation could be better
                 amount_to_remove -= inventory_this_age
                 i -= 1
         return
 
-    def get_total_inventory(product=None):
-        if product not ('ORA' or None):
-            raise ValueError()
+    def get_total_inventory(self, product=None):
+        if (product != 'ORA') and (product is not None):
+            raise ValueError(
+                'There should only be ORA in processing inventories.')
 
         return sum(self.inventory)
 
@@ -229,7 +236,7 @@ class Grove(object):
         self.multipliers = multipliers
         self.shipping_plan = shipping_plan
 
-    def realize_price_month(month_index):
+    def realize_price_month(self, month_index):
         if month_index not in range(0, 12):
             raise ValueError()
 
@@ -240,7 +247,7 @@ class Grove(object):
             price = np.random.normal(mu, sigma)
         return price
 
-    def realize_week_harvest(week_index):
+    def realize_week_harvest(self, week_index):
         if week_index not in range(0, 48):
             raise ValueError()
 
@@ -251,7 +258,7 @@ class Grove(object):
             harvest = np.random.normal(mu, sigma)
         return harvest
 
-    def apply_multipliers(price, t):
+    def apply_multipliers(self, price, t):
         desired_quantity = self.desired_quantities[int((t - 1) / 4)]
 
         if price < self.multipliers['Price 1']:
@@ -263,7 +270,7 @@ class Grove(object):
         else:
             return 0
 
-    def spot_purchase(t):
+    def spot_purchase(self, t):
         price = self.realize_price_month(int(t / 4))
         harvest = self.realize_week_harvest(t)
 
@@ -294,8 +301,14 @@ class Market(object):
         self.prices = prices
         self.demand_function_coefs = demand_function_coefs
 
-    def realize_demand(product, t):
-        pass
+    def realize_demand(self, product, t):
+        these_coefs = self.demand_function_coefs[product]
+        a = these_coefs[0]
+        b = these_coefs[1]
+        price = self.prices[product][int((t - 1) / 4)]
+        expected_demand = a / (price ** 2) + b
+        return np.random.normal(loc=expected_demand,
+                                scale=0.1 * expected_demand)
 
 
 class TankerCarFleet(object):
