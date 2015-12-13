@@ -271,8 +271,8 @@ class Grove(object):
             return 0
 
     def spot_purchase(self, t):
-        price = self.realize_price_month(int(t / 4))
-        harvest = self.realize_week_harvest(t)
+        price = self.realize_price_month(int((t - 1) / 4))
+        harvest = self.realize_week_harvest(t - 1)
 
         if self.apply_multipliers(price, t) > harvest:
             amount_purchased = harvest
