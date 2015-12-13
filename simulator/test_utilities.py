@@ -6,6 +6,7 @@ import pandas as pd
 import sys
 import time
 
+<<<<<<< HEAD
 input_file = ('''/Users/edz/Documents/Princeton/Senior/ORF411'''
               '''/OJ/not_grapefruit/Results/notgrapefruit2016.xlsm''')
 
@@ -13,6 +14,13 @@ input_file = ('''/Users/edz/Documents/Princeton/Senior/ORF411'''
 # initialize the inventory.
 last_year_file = ('''/Users/edz/Documents/Princeton/Senior/ORF411'''
                   '''/OJ/not_grapefruit/Results/notgrapefruit2015.xlsm''')
+=======
+input_file = ('''/Users/kyun/not_grapefruit/Results/notgrapefruit2016.xlsm''')
+
+# We also need the Results file of the previous year in order to
+# initialize the inventory.
+last_year_file = ('''/Users/kyun/not_grapefruit/Results/notgrapefruit2015.xlsm''')
+>>>>>>> sean
 
 print 'Initializing...'
 start = time.time()
@@ -70,7 +78,7 @@ s.remove_product('XOJ', 179.82)
 s.add_product('ROJ', 179.82)
 s.add_product('ORA', 12000)
 s.dispose_capacity(s.get_total_inventory() - s.capacity)
-
+assert s.get_total_inventory() == 12000
 
 #### Test ProcessingPlant
 t = 1
@@ -96,3 +104,17 @@ assert new_process_list[1].finish_time == 2
 assert new_process_list[1].start_product == 'ORA'
 assert new_process_list[1].end_product == 'FCOJ'
 assert np.abs(new_process_list[1].amount - 1700 * (24.35233161  / 100)) < 1e-3
+
+#### Test Grove
+t = 1
+g = groves['FLA']
+price = g.realize_price_month((t - 1)/4)
+assert price > 0
+harvest = g.realize_week_harvest(t)
+assert harvest > 0
+deliveries, raw_cost, shipping_cost = g.spot_purchase(t)
+for d in deliveries:
+   assert d.sender is g
+   assert d.receiver is not g
+   assert d.arrival_time == 2
+   assert d.product == 'ORA'
