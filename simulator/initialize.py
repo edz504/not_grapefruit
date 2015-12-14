@@ -8,6 +8,7 @@ from xlwings import Workbook, Range
 def initialize_inventory(input_file):
     wb = Workbook(input_file)
     inv = {}
+    scheduled_to_ship_in = {}
     num_storages = int(Range('basic_info', 'D8').value)
     for i in xrange(0, num_storages):
         name = Range('basic_info', 'E{0}'.format(10 + i)).value
@@ -40,8 +41,13 @@ def initialize_inventory(input_file):
 
         this_inv['XOJ'] = [0]
         inv[name] = this_inv
+        scheduled_to_ship_in[name] = {
+            'POJ': Range(name, 'AZ10').value,
+            'ROJ': Range(name, 'AZ14').value,
+            'FCOJ': Range(name, 'AZ15').value
+        }
 
-    return inv
+    return inv, scheduled_to_ship_in
 
 def initialize(input_file, initial_inventory):
     # Initialize the markets
@@ -101,12 +107,16 @@ def initialize(input_file, initial_inventory):
     wb = Workbook(input_file)
     # Initialize Storage Systems
     all_storage_names = Range('facilities', 'B36:B106').value
-    num_storages = int(Range('basic_info', 'D8').value)
+    num_storages = int(Range('facilities', 'D16').value)
     storages = {}
     storage_capacities = Range('facilities', 'D36:D106').value
+    non_zero_inds = [i for i in xrange(0, len(all_storage_names))
+                      if (storage_capacities[i] is not None and
+                          storage_capacities[i] != 0)]
+
     for i in xrange(0, num_storages):
-        name = Range('basic_info', 'E{0}'.format(10 + i)).value
-        index = all_storage_names.index(name)
+        index = non_zero_inds[i]
+        name = all_storage_names[index]
         capacity = storage_capacities[index]
         reconstitution_percentages = Range(
             'shipping_manufacturing', 'C{0}:N{0}'.format(38 + i)).value
@@ -145,15 +155,18 @@ def initialize(input_file, initial_inventory):
 
     # Initialize Processing Plants
     all_processing_plant_names = Range('facilities', 'B6:B15').value
-    num_processing_plants = int(Range('basic_info', 'B8').value)
+    num_processing_plants = int(Range('facilities', 'D107').value)
     processing_plants = {}
     processing_capacities = Range('facilities', 'D6:D15').value
+    non_zero_inds = [i for i in xrange(0, len(all_processing_plant_names))
+                      if (processing_capacities[i] is not None and
+                          processing_capacities[i] != 0)]
     tanker_car_counts = Range('facilities', 'D21:D30').value
     storage_names = Range('shipping_manufacturing', 'B27:B{0}'.format(
         26 + len(storages))).value
     for i in xrange(0, num_processing_plants):
-        name = Range('basic_info', 'C{0}'.format(10 + i)).value
-        index = all_processing_plant_names.index(name)
+        index = non_zero_inds[i]
+        name = all_processing_plant_names[index]
         capacity = processing_capacities[index]
         poj_proportion = Range('shipping_manufacturing', (19, 3 + 2 * i)).value
         tanker_car_count = int(tanker_car_counts[index])
@@ -206,10 +219,13 @@ def initialize(input_file, initial_inventory):
         if grove_name not in ['BRA', 'SPA']:
             name_adj = grove_name
         dists = D_gps.loc[location_names, name_adj]
+        proportions = Range(
+            'shipping_manufacturing',
+            (6 + i, 3),
+            (6 + i, 2 + len(storages) + len(processing_plants))).value
+        proportions = [p if p is not None else 0 for p in proportions]
         shipping_plan = dict(zip(location_names,
-                                 zip(Range('shipping_manufacturing',
-                                       'C{0}:J{0}'.format(6 + i)).value,
-                                     dists)))
+                                 list(zip(proportions, dists))))
 
         price_stats = [None] * 12
         exchange_stats = [None] * 12
@@ -274,11 +290,12 @@ def initialize(input_file, initial_inventory):
     # really grabbing the decisions we made earlier.
     # Get FCOJ first.
     futures_maturing_this_year = Range('raw_materials', 'D36:M36').value
-    total_price = (futures_maturing_this_year[0] * futures_maturing_this_year[1] +
-                   futures_maturing_this_year[2] * futures_maturing_this_year[3] +
-                   futures_maturing_this_year[4] * futures_maturing_this_year[5] +
-                   futures_maturing_this_year[6] * futures_maturing_this_year[7] +
-                   futures_maturing_this_year[8] * futures_maturing_this_year[9])
+    fmty = [v if v is not None else 0 for v in futures_maturing_this_year]
+    total_price = (fmty[0] * fmty[1] +
+                   fmty[2] * fmty[3] +
+                   fmty[4] * fmty[5] +
+                   fmty[6] * fmty[7] +
+                   fmty[8] * fmty[9])
 
     arrivals = Range('raw_materials', 'C48:N48').value
 
@@ -286,20 +303,22 @@ def initialize(input_file, initial_inventory):
         'FCOJ': {'quantity': Range('raw_materials', 'P36').value,
                  'total_price': total_price * 2000, # lbs to tons
                  'arrivals': arrivals,
-                 'shipping': dict(zip(Range('shipping_manufacturing',
-                                          'B27:B30').value,
-                                      Range('shipping_manufacturing',
-                                          'C27:C30').value))
+                 'shipping': dict(zip(
+                    Range('shipping_manufacturing',
+                          'B27:B{0}'.format(26 + len(storages))).value,
+                    Range('shipping_manufacturing',
+                          'C27:C{0}'.format(26 + len(storages))).value))
                  }
     }
 
     # Now get the ORA futures (we probably will never buy these).
     futures_maturing_this_year = Range('raw_materials', 'D30:M30').value
-    total_price = (futures_maturing_this_year[0] * futures_maturing_this_year[1] +
-                   futures_maturing_this_year[2] * futures_maturing_this_year[3] +
-                   futures_maturing_this_year[4] * futures_maturing_this_year[5] +
-                   futures_maturing_this_year[6] * futures_maturing_this_year[7] +
-                   futures_maturing_this_year[8] * futures_maturing_this_year[9])
+    fmty = [v if v is not None else 0 for v in futures_maturing_this_year]
+    total_price = (fmty[0] * fmty[1] +
+                   fmty[2] * fmty[3] +
+                   fmty[4] * fmty[5] +
+                   fmty[6] * fmty[7] +
+                   fmty[8] * fmty[9])
 
     arrivals = Range('raw_materials', 'C47:N47').value
     decisions['futures']['ORA'] = {

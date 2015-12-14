@@ -1,5 +1,6 @@
 from initialize import *
 from utilities import *
+import copy
 import math
 import numpy as np
 import pandas as pd
@@ -12,14 +13,17 @@ import time
 # Hard-code the file to use.  Note that we can use both the
 # results .xlsm and the original decisions spreadsheet, because
 # the results .xlsm contains the decision sheets.
-input_file = ('''/Users/kyun/not_grapefruit/Results/notgrapefruit2016.xlsm''')
+ROOT_DIR = os.path.dirname(os.getcwd())
+input_file = os.path.join(ROOT_DIR,'decisions/notgrapefruit2018.xlsm')
+
 # We also need the Results file of the previous year in order to
 # initialize the inventory.
-last_year_file = ('''/Users/kyun/not_grapefruit/Results/notgrapefruit2015.xlsm''')
+last_year_file = os.path.join(ROOT_DIR, 'results/notgrapefruit2017.xlsm')
 
 print 'Initializing...'
 start = time.time()
-initial_inventory = initialize_inventory(last_year_file)
+initial_inventory, scheduled_to_ship_in = initialize_inventory(
+    last_year_file)
 storages, processing_plants, groves, markets, decisions = initialize(
     input_file, initial_inventory)
 print 'Initialization took {0}'.format(time.time() - start)
@@ -64,8 +68,73 @@ processes = []
 deliveries = []
 tanker_car_fleets = []
 
+# Add deliveries from scheduled_to_ship_in, arrival week 1
+for storage_name, storage in storages.iteritems():
+    if storage_name in scheduled_to_ship_in:
+        for product, amount in scheduled_to_ship_in[storage_name].iteritems():
+            deliveries.append(
+                Delivery(sender='prev_year',
+                         receiver=storage,
+                         arrival_time=1,
+                         product=product,
+                         amount=amount))
+
+# Add ORA spot purchase deliveries to P, S, arrival week 1
+# (current decision)
+for grove in groves.values():
+    new_deliveries, raw_cost, shipping_cost = grove.spot_purchase(
+        0, storages, processing_plants, month_index=0)
+    deliveries += new_deliveries
+    cost['purchase']['raw'] += raw_cost
+    cost['transportation']['from_grove'] += shipping_cost
+
+
+    # Add futures deliveries to S, arrival week 1
+    # (current decision)
+    if grove.name == 'FLA':
+        # ORA futures
+        ORA = decisions['futures']['ORA']
+        total_weekly_quantity = (ORA['quantity'] *
+            (ORA['arrivals'][0] / 100) * 0.25)
+        for location, proportion in grove.shipping_plan.iteritems():
+            if proportion[0] is None or proportion[0] == 0:
+                continue
+            else:
+                prop = proportion[0] / 100
+            if location[0] == 'P':
+                receiver = processing_plants[location]
+            else:
+                receiver = storages[location]
+            deliveries.append(
+                Delivery(sender=grove,
+                         receiver=receiver,
+                         arrival_time=1,
+                         product='ORA',
+                         amount=total_weekly_quantity * prop))
+
+        # FCOJ futures
+        FCOJ = decisions['futures']['FCOJ']
+        total_weekly_quantity = (FCOJ['quantity'] *
+            (FCOJ['arrivals'][0] / 100) * 0.25)
+        for storage_name, proportion in FCOJ['shipping'].iteritems():
+            receiver = storages[storage_name]
+            if proportion == 0:
+                continue
+            else:
+                prop = proportion / 100
+            deliveries.append(
+                Delivery(sender=grove,
+                         receiver=receiver,
+                         arrival_time=1,
+                         product='FCOJ',
+                         amount=total_weekly_quantity * prop))
+
+
+
 # Starts at beginning of week 1
-for t in xrange(1, 2):
+for t in xrange(1, 49):
+
+    print 'Beginning week {0}'.format(t)
     month_ind = int((t - 1) / 4)
 
     # Age all storages and processing plants.
@@ -75,10 +144,14 @@ for t in xrange(1, 2):
         processing_plant.age()
 
     # Check tanker_car_fleets arriving
+    tmp_tanker_car_fleets = [] # Keep new list because remove() doesn't work
     for fleet in tanker_car_fleets:
         if fleet.arrival_time == t:
-            fleet.plant.tanker_cars['at_home'] += fleet.amount
-            tanker_car_fleets.remove(fleet) # Remove the fleet
+            fleet.plant.tanker_cars['at_home'] += fleet.size
+            fleet.plant.tanker_cars['going_out'] = 0
+        else:
+            tmp_tanker_car_fleets.append(fleet)
+    tanker_car_fleets = tmp_tanker_car_fleets
 
     # Check Processes that finished and create resulting Deliveries
     # (manufacturing, need to group by plant in order to send out tanker cars
@@ -87,23 +160,27 @@ for t in xrange(1, 2):
                                       [0] * len(processing_plants)))
     processes_by_plant = dict(zip(processing_plants.keys(),
                                   [[]] * len(processing_plants)))
+    tmp_processes = []
     for process in processes:
         if process.finish_time == t:
             # Manufacturing
-            if start_product == 'ORA':
+            if process.start_product == 'ORA':
                 process.location.remove_product('ORA', process.amount)
                 # Aggregate the total processed product at each plant
                 total_product_by_plant[process.location.name] += process.amount
                 # Also keep a list of the processes that this plant has finishing
-                processes_by_plant[process.location.name].append(process)
+                prev_list = copy.copy(processes_by_plant[process.location.name])
+                processes_by_plant[process.location.name] = prev_list + [process]
 
             # Reconstitution
-            elif start_product == 'FCOJ':
+            elif process.start_product == 'FCOJ':
                 process.location.remove_product('XOJ', process.amount)
                 process.location.add_product('ROJ', process.amount)
-                processes.remove(process)
             else:
                 raise ValueError('Process must start with ORA or FCOJ')
+        else:
+            tmp_processes.append(process)
+    processes = tmp_processes
 
     # Go through each plant now that we know how much product it has finished
     # processing.
@@ -121,27 +198,25 @@ for t in xrange(1, 2):
                 TankerCarFleet(plant, t + 2, tanker_cars_needed))
 
             # Add new Deliveries to Storages according to shipping plan
-            total_dist = 0
-            for process in processes_by_plant[plant]:
+            total_dist = {}
+            for process in processes_by_plant[plant_name]:
                 # Go through all storages to ship to
                 product_shipping_plan = plant.shipping_plan[process.end_product]
                 for storage_name in product_shipping_plan:
                     proportion = product_shipping_plan[storage_name][0]
-                    if proportion is not None:                
+                    if proportion is not None and proportion != 0:
+                        prop = proportion / 100                
                         deliveries.append(
                             Delivery(sender=plant,
                                      receiver=storages[storage_name],
                                      arrival_time = t + 1,
                                      product=process.end_product,
-                                     amount=process.amount * proportion))
-                        total_dist += product_shipping_plan[storage_name][1]
-                
-                # Remove this process from the original processes list
-                processes.remove(process)
+                                     amount=process.amount * prop))
+                        if storage_name not in total_dist.keys():
+                            total_dist[storage_name] = product_shipping_plan[storage_name][1]
 
-            # Add to travel and holding cost.  Note that we double the travel
-            # cost to account for coming back, and we add in this cost now.
-            cost['transportation']['from_plants'] += (2 * 36 * total_dist *
+            # Add to travel and holding cost.
+            cost['transportation']['from_plants'] += (36 * sum(total_dist.values()) *
                                                       tanker_cars_needed)
             cost['maintenance']['tanker'] += 10 * plant.tanker_cars['at_home']
         else:
@@ -152,10 +227,16 @@ for t in xrange(1, 2):
 
     # Check Deliveries that arrive.  Add in all incoming deliveries, and then
     # do a capacity check afterwards (both storages and plants).
+    tmp_deliveries = []
     for delivery in deliveries:
         if delivery.arrival_time == t:
+            # print 'Delivery from {0} to {1} of {2} {3} arrived'.format(
+            #     delivery.sender.name, delivery.receiver.name,
+            #     delivery.amount, delivery.product)
             delivery.receiver.add_product(delivery.product, delivery.amount)
-        deliveries.remove(delivery) # Remove the delivery
+        else:
+            tmp_deliveries.append(delivery)
+    deliveries = tmp_deliveries
     for storage in storages.values():
         storage.dispose_capacity(
             storage.get_total_inventory() - storage.capacity)
@@ -166,7 +247,8 @@ for t in xrange(1, 2):
     # Go through Groves and make spot purchases (create Deliveries).
     # Also make Futures deliveries for FLA.
     for grove in groves.values():
-        new_deliveries, raw_cost, shipping_cost = grove.spot_purchase(t)
+        new_deliveries, raw_cost, shipping_cost = grove.spot_purchase(t,
+            storages, processing_plants)
         deliveries += new_deliveries
         cost['purchase']['raw'] += raw_cost
         cost['transportation']['from_grove'] += shipping_cost
@@ -177,6 +259,10 @@ for t in xrange(1, 2):
             total_weekly_quantity = (ORA['quantity'] *
                 (ORA['arrivals'][month_ind] / 100) * 0.25)
             for location, proportion in grove.shipping_plan.iteritems():
+                if proportion[0] is None or proportion[0] == 0:
+                    continue
+                else:
+                    prop = proportion[0] / 100
                 if location[0] == 'P':
                     receiver = processing_plants[location]
                 else:
@@ -184,8 +270,9 @@ for t in xrange(1, 2):
                 deliveries.append(
                     Delivery(sender=grove,
                              receiver=receiver,
-                             arrival_time=(t+1),
-                             amount=total_weekly_quantity * proportion))
+                             arrival_time=(t + 1),
+                             product='ORA',
+                             amount=total_weekly_quantity * prop))
 
             # FCOJ futures
             FCOJ = decisions['futures']['FCOJ']
@@ -193,11 +280,16 @@ for t in xrange(1, 2):
                 (FCOJ['arrivals'][month_ind] / 100) * 0.25)
             for storage_name, proportion in FCOJ['shipping'].iteritems():
                 receiver = storages[storage_name]
+                if proportion == 0:
+                    continue
+                else:
+                    prop = proportion / 100
                 deliveries.append(
                     Delivery(sender=grove,
                              receiver=receiver,
                              arrival_time=(t + 1),
-                             amount=total_weekly_quantity * proportion))
+                             product='FCOJ',
+                             amount=total_weekly_quantity * prop))
 
     # Go through Plants and manufacture (create Processes).
     for processing_plant in processing_plants.values():
@@ -208,12 +300,14 @@ for t in xrange(1, 2):
 
     # Go through Storages and reconstitute (create Processes), using the XOJ.
     for storage in storages.values():
-        new_processes, cost = storage.reconstitute(t)
-        processes.append(new_processes)
-        cost['manufacturing']['ROJ (reconstitution)'] += cost
+        new_processes, recon_cost = storage.reconstitute(t)
+        processes += new_processes
+        cost['manufacturing']['ROJ (reconstitution)'] += recon_cost
 
+    print 'Storage inventories before selling:'
     # Go through Storages and sell to each of its markets.
     for storage in storages.values():
+        print storage.inventory
         for product in PRODUCTS:
             market_demands = [None] * len(storage.markets)
             market_dists = [None] * len(storage.markets)
@@ -224,6 +318,9 @@ for t in xrange(1, 2):
             market_sell = [None] * len(storage.markets)
             inv = storage.get_total_inventory(product)
             total_demand = sum(market_demands)
+            # print '{0}, {1}: inventory = {2}, demand = {3}'.format(
+            #     storage.name, product, inv, total_demand)
+
             # If demand exceeds inventory, sell to the markets proportionally.
             if total_demand <= inv:
                 market_sell = market_demands
@@ -238,7 +335,7 @@ for t in xrange(1, 2):
                 sales[product] += inv
             for i, sale in enumerate(market_sell):
                 price = market.prices[product][month_ind]
-                revenue[product] += price * sale
+                revenues[product] += price * sale * 2000
                 cost['transportation']['from_storages'] += (1.2 *
                                                             market_dists[i] *
                                                             sale)
@@ -246,6 +343,7 @@ for t in xrange(1, 2):
     # Calculate holding costs.
     for storage in storages.values():
         cost['inventory_hold'] += storage.get_total_inventory() * 60
+
 
 # Add in annual costs
 cost['purchase']['futures']['ORA'] += decisions['futures']['ORA']['total_price']
@@ -255,7 +353,7 @@ cost['maintenance']['storage'] += sum([7.5e6 + 650 * s.capacity
 cost['maintenance']['processing'] += sum([8.0e6 + 2500 * p.capacity
                                           for p in processing_plants.values()])
 
-for storage, (old, new) in decisions['capacity']['storage'].iteritems():
+for storage_name, (old, new) in decisions['capacity']['storage'].iteritems():
     # Buying capacity (but not a new storage)
     if old != 0 and new > old:
         this_cost = 6000 * (new - old)
@@ -278,7 +376,7 @@ for storage, (old, new) in decisions['capacity']['storage'].iteritems():
 
     cost['capacity_change']['storage'] += this_cost
 
-for plant, (old, new) in decisions['capacity']['processing'].iteritems():
+for plant_name, (old, new) in decisions['capacity']['processing'].iteritems():
     # Buying capacity (but not a new plant)
     if old != 0 and new > old:
         this_cost = 8000 * (new - old)
@@ -299,11 +397,21 @@ for plant, (old, new) in decisions['capacity']['processing'].iteritems():
     elif old == 0 == new:
         this_cost = 0
 
-    print this_cost
     cost['capacity_change']['processing'] += this_cost
 
-for plant, (old, new) in decisions['capacity']['tankers'].iteritems():
+for plant_name, (old, new) in decisions['capacity']['tankers'].iteritems():
     if new > old:
         cost['capacity_change']['tanker'] += 100000 * (new - old)
     else:
         cost['capacity_change']['tanker'] -= .6 * 100000 * (old - new)
+
+total_revenue = sum(revenues.values())
+print 'Total Revenue: {0}'.format(total_revenue)
+total_cost = (cost['purchase']['raw'] + sum(cost['purchase']['futures'].values()) +
+              sum(cost['transportation'].values()) +
+              sum(cost['maintenance'].values()) +
+              sum(cost['capacity_change'].values()) +
+              cost['inventory_hold'] +
+              sum(cost['manufacturing'].values()))
+print 'Total Cost: {0}'.format(total_cost)
+print 'Profit: {0}'.format(total_revenue - total_cost)

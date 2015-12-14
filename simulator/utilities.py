@@ -6,6 +6,9 @@ PRODUCTS = ['ORA', 'POJ', 'ROJ', 'FCOJ']
 REGIONS = ['NE', 'MA', 'SE', 'MW', 'DS', 'NW', 'SW']
 MONTHS = ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
           'Jul', 'Aug']
+REGION_SIZES = {'NE': 14, 'MA': 17, 'SE': 12,
+                'MW': 22, 'DS': 16, 'NW': 8,
+                'SW': 11}
 
 ### Classes 
 class Delivery(object):
@@ -19,6 +22,11 @@ class Delivery(object):
         else:
             raise ValueError('Bad product given')
         self.amount = amount
+
+    def __str__(self):
+        return '{0}->{1} of {2} x {3}, due {4}'.format(
+            self.sender.name, self.receiver.name, self.amount,
+            self.product, self.arrival_time)
 
 
 class Process(object):
@@ -35,6 +43,11 @@ class Process(object):
             raise ValueError('Bad product given')
         self.amount = amount
 
+    def __str__(self):
+        return '@{0} of {1}->{2} x {3}, due {4}'.format(
+            self.location.name, self.start_product, self.end_product,
+            self.amount, self.finish_time)
+
 
 class Storage(object):
 
@@ -48,6 +61,8 @@ class Storage(object):
 
     def reconstitute(self, t):
         recon_percentage = self.reconstitution_percentages[(t - 1) / 4]
+        if recon_percentage is None:
+            recon_percentage = 0
         fcoj_inventory = self.get_total_inventory('FCOJ')
         amount_to_recon = (recon_percentage / 100.) * fcoj_inventory
 
@@ -243,12 +258,14 @@ class Grove(object):
             price = np.random.normal(mu, sigma)
         return price
 
-    def realize_week_harvest(self, week_index):
-        if week_index not in range(0, 48):
+    def realize_week_harvest(self, month_index):
+        if month_index not in range(0, 12):
             raise ValueError()
 
-        mu = self.harvest_stats[week_index][0]
-        sigma = self.harvest_stats[week_index][1]
+        mu = self.harvest_stats[month_index][0]
+        sigma = self.harvest_stats[month_index][1]
+        if sigma == 0:
+            return mu
         harvest = np.random.normal(mu, sigma)
         while harvest < 0:
             harvest = np.random.normal(mu, sigma)
@@ -256,6 +273,8 @@ class Grove(object):
 
     def apply_multipliers(self, price, t):
         desired_quantity = self.desired_quantities[int((t - 1) / 4)]
+        if desired_quantity is None:
+            desired_quantity = 0
 
         if price < self.multipliers[1]:
             return desired_quantity * self.multipliers[0]
@@ -266,9 +285,14 @@ class Grove(object):
         else:
             return 0
 
-    def spot_purchase(self, t):
-        price = self.realize_price_month(int((t - 1) / 4))
-        harvest = self.realize_week_harvest(t - 1)
+    def spot_purchase(self, t, storages, processing_plants, month_index=None):
+        # This special case for month_index is in the first spot purchase,
+        # when we want arrival time to be 1, but the month_index must be 0,
+        # not -1.
+        if month_index is None:
+            month_index = int((t - 1) / 4)
+        price = self.realize_price_month(month_index)
+        harvest = self.realize_week_harvest(month_index)
 
         if self.apply_multipliers(price, t) > harvest:
             amount_purchased = harvest
@@ -279,16 +303,23 @@ class Grove(object):
         raw_cost = price * amount_purchased
         shipping_cost = 0
         for key in self.shipping_plan:
-            if self.shipping_plan[key][0] is None:
-                p = 0.0
+            if (self.shipping_plan[key][0] is None or
+                self.shipping_plan[key][0] == 0):
+                continue
             else:
-                p = self.shipping_plan[key][0]/100.0
+                p = self.shipping_plan[key][0] / 100.0
             distance = self.shipping_plan[key][1]
 
-            deliveries.append(Delivery(self, key, t + 1, 'ORA',
-                                         p * amount_purchased))
+            if key[0] == 'P':
+                receiver = processing_plants[key]
+            else:
+                receiver = storages[key]
+
+            deliveries.append(Delivery(self, receiver, t + 1, 'ORA',
+                                       p * amount_purchased))
             shipping_cost += 0.22 * p * amount_purchased * distance
-        return (deliveries, raw_cost, shipping_cost)
+
+        return (deliveries, raw_cost * 2000, shipping_cost)
 
 
 class Market(object):
@@ -305,8 +336,11 @@ class Market(object):
         b = these_coefs[1]
         price = self.prices[product][int((t - 1) / 4)]
         expected_demand = a / (price ** 2) + b
-        return np.random.normal(loc=expected_demand,
-                                scale=0.1 * expected_demand)
+        regional_demand = np.random.normal(loc=expected_demand,
+                                           scale=0.1 * expected_demand)
+        # Return regional_demand / N, where N is the number of market
+        # in this market's region.
+        return regional_demand / REGION_SIZES[self.region]
 
 
 class TankerCarFleet(object):

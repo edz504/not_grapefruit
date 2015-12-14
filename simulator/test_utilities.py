@@ -6,7 +6,6 @@ import pandas as pd
 import sys
 import time
 
-<<<<<<< HEAD
 input_file = ('''/Users/edz/Documents/Princeton/Senior/ORF411'''
               '''/OJ/not_grapefruit/Results/notgrapefruit2016.xlsm''')
 
@@ -14,13 +13,6 @@ input_file = ('''/Users/edz/Documents/Princeton/Senior/ORF411'''
 # initialize the inventory.
 last_year_file = ('''/Users/edz/Documents/Princeton/Senior/ORF411'''
                   '''/OJ/not_grapefruit/Results/notgrapefruit2015.xlsm''')
-=======
-input_file = ('''/Users/kyun/not_grapefruit/Results/notgrapefruit2016.xlsm''')
-
-# We also need the Results file of the previous year in order to
-# initialize the inventory.
-last_year_file = ('''/Users/kyun/not_grapefruit/Results/notgrapefruit2015.xlsm''')
->>>>>>> sean
 
 print 'Initializing...'
 start = time.time()
