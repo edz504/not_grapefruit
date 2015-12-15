@@ -4,8 +4,8 @@ library(ggplot2)
 
 sales_df <- read.csv('sales.csv', stringsAsFactors=FALSE)
 sales_df$weekly_sales <- sales_df$Sales / 4
-regions <- unique(sales.df$Region)
-products <- unique(sales.df$Product)
+regions <- unique(sales_df$Region)
+products <- unique(sales_df$Product)
 price_neighborhoods <- seq(1, 4, by=0.75)
 
 get.neighborhood <- function(p, price_neighborhoods) {
@@ -68,6 +68,13 @@ for (region in regions) {
         # censoring at that level is ineffective anyways.
         this_df[which(this_df$Price >= 3), ]$keep <- TRUE
 
+        # We also keep everything for ORA (not a lot of censored, and
+        # heavily inflated in uncensored places).
+        # if (product == 'ORA') {
+        #     this_df$keep <- TRUE
+        # }
+        # NVM that didn't work
+        
         # Fit the model only on clean data
         clean_df <- this_df[this_df$keep, ]
         model <- lm(weekly_sales ~ I(Price ^ (-2)), data=clean_df)

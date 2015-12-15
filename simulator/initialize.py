@@ -107,7 +107,7 @@ def initialize(input_file, initial_inventory):
     wb = Workbook(input_file)
     # Initialize Storage Systems
     all_storage_names = Range('facilities', 'B36:B106').value
-    num_storages = int(Range('facilities', 'D16').value)
+    num_storages = int(Range('facilities', 'D107').value)
     storages = {}
     storage_capacities = Range('facilities', 'D36:D106').value
     non_zero_inds = [i for i in xrange(0, len(all_storage_names))
@@ -155,7 +155,7 @@ def initialize(input_file, initial_inventory):
 
     # Initialize Processing Plants
     all_processing_plant_names = Range('facilities', 'B6:B15').value
-    num_processing_plants = int(Range('facilities', 'D107').value)
+    num_processing_plants = int(Range('facilities', 'D16').value)
     processing_plants = {}
     processing_capacities = Range('facilities', 'D6:D15').value
     non_zero_inds = [i for i in xrange(0, len(all_processing_plant_names))
@@ -195,7 +195,10 @@ def initialize(input_file, initial_inventory):
     # Initialize Groves (store spot purchase and from_grove shipping decisions
     # in these objects)
     groves = {}
-    location_names = Range('shipping_manufacturing', 'C5:J5').value
+    location_names = Range(
+        'shipping_manufacturing',
+        (5, 3),
+        (5, 2 + len(storages) + len(processing_plants))).value
 
     raw_price_beliefs_mean = pd.read_csv(os.path.join(ROOT_DIR, 
         'grove_beliefs/raw_price_beliefs_mean.csv'))
@@ -298,16 +301,18 @@ def initialize(input_file, initial_inventory):
                    fmty[8] * fmty[9])
 
     arrivals = Range('raw_materials', 'C48:N48').value
-
+    storage_names = Range('shipping_manufacturing',
+                          'B27:B{0}'.format(26 + len(storages))).value
+    proportions = Range('shipping_manufacturing',
+                        'C27:C{0}'.format(26 + len(storages))).value
+    dists = D_gps.loc[storage_names, 'FLA']
     decisions['futures'] = {
         'FCOJ': {'quantity': Range('raw_materials', 'P36').value,
                  'total_price': total_price * 2000, # lbs to tons
                  'arrivals': arrivals,
                  'shipping': dict(zip(
-                    Range('shipping_manufacturing',
-                          'B27:B{0}'.format(26 + len(storages))).value,
-                    Range('shipping_manufacturing',
-                          'C27:C{0}'.format(26 + len(storages))).value))
+                    storage_names,
+                    zip(proportions, dists)))
                  }
     }
 

@@ -1,5 +1,6 @@
 '''Contains Class definitions for all objects used in simulate.py'''
 import numpy as np
+import copy
 
 ### Constants
 PRODUCTS = ['ORA', 'POJ', 'ROJ', 'FCOJ']
@@ -24,8 +25,12 @@ class Delivery(object):
         self.amount = amount
 
     def __str__(self):
+        if type(self.sender) is str:
+            s = self.sender
+        else:
+            s = self.sender.name
         return '{0}->{1} of {2} x {3}, due {4}'.format(
-            self.sender.name, self.receiver.name, self.amount,
+            s, self.receiver.name, self.amount,
             self.product, self.arrival_time)
 
 
@@ -102,7 +107,7 @@ class Storage(object):
 
                 else:
                     # Calculate proportion to remove for each product
-                    p = amount_to_remove/week_total
+                    p = float(amount_to_remove) / week_total
 
                     for x, product in zip(weekly_inventories, available_products):
                         self.remove_product(product, x * p)

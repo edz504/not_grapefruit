@@ -4,6 +4,7 @@ import copy
 import math
 import numpy as np
 import pandas as pd
+import subprocess
 import sys
 import time
 
@@ -14,11 +15,75 @@ import time
 # results .xlsm and the original decisions spreadsheet, because
 # the results .xlsm contains the decision sheets.
 ROOT_DIR = os.path.dirname(os.getcwd())
-input_file = os.path.join(ROOT_DIR,'decisions/notgrapefruit2018.xlsm')
+
+# FOUR = False
+# if FOUR:
+#     input_file = os.path.join(ROOT_DIR,
+#         'decisions/notgrapefruit2019_4test_tweak.xlsx')
+# else:
+#     input_file = os.path.join(ROOT_DIR,
+#         'decisions/notgrapefruit2019_5test_tweak.xlsx')
+input_file = os.path.join(ROOT_DIR,
+    'decisions/notgrapefruit2018.xlsm')
 
 # We also need the Results file of the previous year in order to
 # initialize the inventory.
-last_year_file = os.path.join(ROOT_DIR, 'results/notgrapefruit2017.xlsm')
+last_year_file = os.path.join(ROOT_DIR,
+    'results/notgrapefruit2017.xlsm')
+
+# Hard-code for 4/5 experiment, assume we start with 0 inv
+# initial_inventory = {
+#     'S35': {
+#         'ORA': [0] * 4,
+#         'POJ': [0] * 8,
+#         'ROJ': [0] * 12,
+#         'FCOJ': [0] * 48,
+#         'XOJ': [0]
+#     },
+#     'S51': {
+#         'ORA': [0] * 4,
+#         'POJ': [0] * 8,
+#         'ROJ': [0] * 12,
+#         'FCOJ': [0] * 48,
+#         'XOJ': [0]
+#     },
+#     'S59': {
+#         'ORA': [0] * 4,
+#         'POJ': [0] * 8,
+#         'ROJ': [0] * 12,
+#         'FCOJ': [0] * 48,
+#         'XOJ': [0]
+#     },
+#     'S73': {
+#         'ORA': [0] * 4,
+#         'POJ': [0] * 8,
+#         'ROJ': [0] * 12,
+#         'FCOJ': [0] * 48,
+#         'XOJ': [0]
+#     }
+# }
+# scheduled_to_ship_in = {
+#     'S35': {
+#         'POJ': 98.634,
+#         'FCOJ': 36.97,
+#         'ROJ': 45.79196
+#     },
+#     'S51': {
+#         'POJ': 218.88555,
+#         'FCOJ': 158.05,
+#         'ROJ': 249.50164,
+#     },
+#     'S59': {
+#         'POJ': 82.316,
+#         'FCOJ': 77.9730,
+#         'ROJ': 86.51086
+#     },
+#     'S73': {
+#         'POJ': 122.47359,
+#         'FCOJ': 101.586,
+#         'ROJ': 69.24297
+#     }
+# }
 
 print 'Initializing...'
 start = time.time()
@@ -28,8 +93,6 @@ storages, processing_plants, groves, markets, decisions = initialize(
     input_file, initial_inventory)
 print 'Initialization took {0}'.format(time.time() - start)
 
-
-# Can easily modify the below to be week by week
 sales = {'ORA': 0, 'POJ': 0, 'ROJ': 0, 'FCOJ': 0}
 revenues = {'ORA': 0, 'POJ': 0, 'ROJ': 0, 'FCOJ': 0}
 cost = {
@@ -48,7 +111,9 @@ cost = {
     'transportation': {
         'from_grove': 0,
         'from_plants': 0,
-        'from_storages': 0
+        'from_storages': 0,
+        'from_grove_futures_fcoj': 0,
+        'from_grove_futures_ora': 0
     },
     'inventory_hold': 0,
     'maintenance': {
@@ -63,6 +128,10 @@ cost = {
     }
 }
 
+leftovers = pd.DataFrame(
+    columns=['t', 'storage', 'product', 'leftover'])
+throwouts = pd.DataFrame(
+    columns=['t', 'storage', 'throwout'])
 
 processes = []
 deliveries = []
@@ -88,7 +157,6 @@ for grove in groves.values():
     cost['purchase']['raw'] += raw_cost
     cost['transportation']['from_grove'] += shipping_cost
 
-
     # Add futures deliveries to S, arrival week 1
     # (current decision)
     if grove.name == 'FLA':
@@ -96,11 +164,11 @@ for grove in groves.values():
         ORA = decisions['futures']['ORA']
         total_weekly_quantity = (ORA['quantity'] *
             (ORA['arrivals'][0] / 100) * 0.25)
-        for location, proportion in grove.shipping_plan.iteritems():
-            if proportion[0] is None or proportion[0] == 0:
+        for location, (proportion, dist) in grove.shipping_plan.iteritems():
+            if proportion is None or proportion == 0:
                 continue
             else:
-                prop = proportion[0] / 100
+                prop = proportion / 100
             if location[0] == 'P':
                 receiver = processing_plants[location]
             else:
@@ -111,12 +179,15 @@ for grove in groves.values():
                          arrival_time=1,
                          product='ORA',
                          amount=total_weekly_quantity * prop))
+            cost['transportation']['from_grove_futures_ora'] += (0.22 *
+                    prop * total_weekly_quantity *
+                    dist)
 
         # FCOJ futures
         FCOJ = decisions['futures']['FCOJ']
         total_weekly_quantity = (FCOJ['quantity'] *
             (FCOJ['arrivals'][0] / 100) * 0.25)
-        for storage_name, proportion in FCOJ['shipping'].iteritems():
+        for storage_name, (proportion, dist) in FCOJ['shipping'].iteritems():
             receiver = storages[storage_name]
             if proportion == 0:
                 continue
@@ -128,12 +199,12 @@ for grove in groves.values():
                          arrival_time=1,
                          product='FCOJ',
                          amount=total_weekly_quantity * prop))
-
+            cost['transportation']['from_grove_futures_fcoj'] += (0.22 *
+                    prop * total_weekly_quantity * dist)
 
 
 # Starts at beginning of week 1
 for t in xrange(1, 49):
-
     print 'Beginning week {0}'.format(t)
     month_ind = int((t - 1) / 4)
 
@@ -237,12 +308,31 @@ for t in xrange(1, 49):
         else:
             tmp_deliveries.append(delivery)
     deliveries = tmp_deliveries
+
+    storage_name_col = []
+    throwout_amount = []
     for storage in storages.values():
-        storage.dispose_capacity(
-            storage.get_total_inventory() - storage.capacity)
+        shortage = (storage.get_total_inventory() -
+                    storage.capacity)
+        storage_name_col.append(storage.name)
+        throwout_amount.append(shortage)
+        # if shortage > 0:
+            # print '{0} current inventory'.format(storage.name)
+            # print storage.inventory
+            # print 'Throwing out {0}'.format(
+            #     shortage)
+        storage.dispose_capacity(shortage)
+    this_throwouts = pd.DataFrame({
+        't': [t] * len(storage_name_col),
+        'storage': storage_name_col,
+        'throwout': throwout_amount
+    })
+    throwouts = pd.concat((throwouts, this_throwouts))
+
     for processing_plant in processing_plants.values():
-        processing_plant.dispose_capacity(
-            processing_plant.get_total_inventory() - processing_plant.capacity)
+        shortage = (processing_plant.get_total_inventory() -
+                    processing_plant.capacity)
+        processing_plant.dispose_capacity(shortage)
 
     # Go through Groves and make spot purchases (create Deliveries).
     # Also make Futures deliveries for FLA.
@@ -258,11 +348,11 @@ for t in xrange(1, 49):
             ORA = decisions['futures']['ORA']
             total_weekly_quantity = (ORA['quantity'] *
                 (ORA['arrivals'][month_ind] / 100) * 0.25)
-            for location, proportion in grove.shipping_plan.iteritems():
-                if proportion[0] is None or proportion[0] == 0:
+            for location, (proportion, dist) in grove.shipping_plan.iteritems():
+                if proportion is None or proportion == 0:
                     continue
                 else:
-                    prop = proportion[0] / 100
+                    prop = proportion / 100
                 if location[0] == 'P':
                     receiver = processing_plants[location]
                 else:
@@ -272,13 +362,15 @@ for t in xrange(1, 49):
                              receiver=receiver,
                              arrival_time=(t + 1),
                              product='ORA',
-                             amount=total_weekly_quantity * prop))
+                             amount=total_weekly_quantity * prop)) 
+                cost['transportation']['from_grove_futures_ora'] += (0.22 *
+                    prop * total_weekly_quantity * dist)
 
             # FCOJ futures
             FCOJ = decisions['futures']['FCOJ']
             total_weekly_quantity = (FCOJ['quantity'] *
                 (FCOJ['arrivals'][month_ind] / 100) * 0.25)
-            for storage_name, proportion in FCOJ['shipping'].iteritems():
+            for storage_name, (proportion, dist) in FCOJ['shipping'].iteritems():
                 receiver = storages[storage_name]
                 if proportion == 0:
                     continue
@@ -290,6 +382,8 @@ for t in xrange(1, 49):
                              arrival_time=(t + 1),
                              product='FCOJ',
                              amount=total_weekly_quantity * prop))
+                cost['transportation']['from_grove_futures_fcoj'] += (0.22 *
+                    prop * total_weekly_quantity * dist)
 
     # Go through Plants and manufacture (create Processes).
     for processing_plant in processing_plants.values():
@@ -304,10 +398,12 @@ for t in xrange(1, 49):
         processes += new_processes
         cost['manufacturing']['ROJ (reconstitution)'] += recon_cost
 
-    print 'Storage inventories before selling:'
+    storage_name_col = []
+    product_name_col = []
+    leftover_amount = []
+
     # Go through Storages and sell to each of its markets.
     for storage in storages.values():
-        print storage.inventory
         for product in PRODUCTS:
             market_demands = [None] * len(storage.markets)
             market_dists = [None] * len(storage.markets)
@@ -320,12 +416,18 @@ for t in xrange(1, 49):
             total_demand = sum(market_demands)
             # print '{0}, {1}: inventory = {2}, demand = {3}'.format(
             #     storage.name, product, inv, total_demand)
+            storage_name_col.append(storage.name)
+            product_name_col.append(product)
+            leftover_amount.append(inv - total_demand)
 
             # If demand exceeds inventory, sell to the markets proportionally.
             if total_demand <= inv:
                 market_sell = market_demands
                 storage.remove_product(product, total_demand)
                 sales[product] += total_demand
+                print 'Sold {0} of {1} at {2}'.format(total_demand,
+                    product, storage.name)
+
             else:
                 market_demands_proportions = [d / total_demand
                                               for d in market_demands]
@@ -333,16 +435,28 @@ for t in xrange(1, 49):
                                for p in market_demands_proportions]
                 storage.remove_product(product, inv)
                 sales[product] += inv
+                print 'Sold {0} of {1} at {2}'.format(inv,
+                    product, storage.name)
             for i, sale in enumerate(market_sell):
                 price = market.prices[product][month_ind]
                 revenues[product] += price * sale * 2000
                 cost['transportation']['from_storages'] += (1.2 *
                                                             market_dists[i] *
                                                             sale)
+    these_leftovers = pd.DataFrame({
+            't': [t] * len(storage_name_col),
+            'storage': storage_name_col,
+            'product': product_name_col,
+            'leftover': leftover_amount
+    })
+
+    leftovers = pd.concat((leftovers, these_leftovers))
 
     # Calculate holding costs.
     for storage in storages.values():
         cost['inventory_hold'] += storage.get_total_inventory() * 60
+
+
 
 
 # Add in annual costs
@@ -415,3 +529,9 @@ total_cost = (cost['purchase']['raw'] + sum(cost['purchase']['futures'].values()
               sum(cost['manufacturing'].values()))
 print 'Total Cost: {0}'.format(total_cost)
 print 'Profit: {0}'.format(total_revenue - total_cost)
+
+# Dump leftovers, throwouts into csv
+leftovers.to_csv('leftovers.csv', index=False)
+throwouts.to_csv('throwouts.csv', index=False)
+subprocess.call("/usr/local/bin/Rscript diagnose.R",
+                shell=True)
