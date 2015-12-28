@@ -43,8 +43,8 @@ opt <- fcoj.demands %>%
 print('Profit - purchase cost')
 sum(opt$profit) - (1.12847 * 136000 * 2000 / 48)
 
-# The above needs to be constrained by our demands, which
-# need to sum to less than 2834.
+# The above needs to be constrained by our supply, which
+# need to sum to less than 2834, the weekly incoming supply.
 
 # This function takes in a vector of prices
 # (NE, MA, SE, MW, DS, NW, SW) and returns a dataframe
@@ -83,9 +83,16 @@ get.obj.const <- function(region.prices) {
              sum(df$predicted_demand)))
 }
 
+# We run 100k iterations, sampling random prices
 ITER <- 100000
 profits <- rep(NA, ITER)
-CONSTRAINT <- 136000 / 44 # Read this in
+
+# This constraint depends on our quantity of maturing contracts
+# (which through 2020 is 136k) and the number of weeks we
+# can have them arrive through.  Usually this is 48, but for
+# years where we need to clear out in the first month and avoid
+# inventory problems, we set it to 44.
+CONSTRAINT <- 136000 / 48
 prices.mat <- matrix(NA, ITER, 7)
 for (i in 1:ITER) {
   prices <- round(runif(7, 1, 4), 2)

@@ -277,7 +277,10 @@ class Grove(object):
         return harvest
 
     def apply_multipliers(self, price, t):
-        desired_quantity = self.desired_quantities[int((t - 1) / 4)]
+        if t == 0:
+            desired_quantity = self.desired_quantities[0]
+        else:
+            desired_quantity = self.desired_quantities[int((t - 1) / 4)]
         if desired_quantity is None:
             desired_quantity = 0
 
@@ -290,11 +293,13 @@ class Grove(object):
         else:
             return 0
 
-    def spot_purchase(self, t, storages, processing_plants, month_index=None):
+    def spot_purchase(self, t, storages, processing_plants):
         # This special case for month_index is in the first spot purchase,
         # when we want arrival time to be 1, but the month_index must be 0,
         # not -1.
-        if month_index is None:
+        if t == 0:
+            month_index = 0
+        else:
             month_index = int((t - 1) / 4)
         price = self.realize_price_month(month_index)
         harvest = self.realize_week_harvest(month_index)

@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 import pandas as pd
 import os
@@ -10,6 +11,12 @@ def initialize_inventory(input_file):
     inv = {}
     scheduled_to_ship_in = {}
     num_storages = int(Range('basic_info', 'D8').value)
+
+    # Need to grab final reconstitution numbers in order to properly initialize
+    # the FCOJ inventory.
+    last_recon = Range('shipping_manufacturing',
+                       'N38:N{0}'.format(37 + num_storages)).value
+
     for i in xrange(0, num_storages):
         name = Range('basic_info', 'E{0}'.format(10 + i)).value
         # Inventory before sales
@@ -25,6 +32,21 @@ def initialize_inventory(input_file):
             'ROJ': Range(name, 'AY180').value,
             'FCOJ': Range(name, 'AY182').value
         }
+
+        this_recon = last_recon[i]
+        # First remove reconned amount from FCOJ inv
+        amount_to_remove = this_recon * sum(this_inv['FCOJ'])
+        i = len(this_inv['FCOJ']) - 1
+        # Subtract inventory using recon, priority = age
+        while amount_to_remove > 0 and i >= 0:
+            inventory_this_age = this_inv['FCOJ'][i]
+            if inventory_this_age > amount_to_remove:
+                this_inv['FCOJ'][i] -= amount_to_remove
+            else:
+                this_inv['FCOJ'][i] = 0
+            amount_to_remove -= inventory_this_age
+            i -= 1
+
         for product, sales in these_sales.iteritems():
             amount_to_remove = sales
             i = len(this_inv[product]) - 1
@@ -34,7 +56,7 @@ def initialize_inventory(input_file):
                 if inventory_this_age > amount_to_remove:
                     this_inv[product][i] -= amount_to_remove
                 else:
-                    this_inv[product][i]= 0
+                    this_inv[product][i] = 0
 
                 amount_to_remove -= inventory_this_age
                 i -= 1
@@ -121,7 +143,8 @@ def initialize(input_file, initial_inventory):
         reconstitution_percentages = Range(
             'shipping_manufacturing', 'C{0}:N{0}'.format(38 + i)).value
         if name in initial_inventory.keys():
-            inv = initial_inventory[name]
+            tmp = dict(initial_inventory)
+            inv = tmp[name]
         else:
             inv = {
                 'XOJ': [0],

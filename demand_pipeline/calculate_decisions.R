@@ -4,7 +4,9 @@ library(dplyr)
 ora <- read.csv('profit_csvs/ora_max_profit.csv')
 poj <- read.csv('profit_csvs/poj_max_profit.csv')
 roj <- read.csv('profit_csvs/roj_max_profit.csv')
+# roj <- read.csv('profit_csvs/roj_futures_max_profit.csv')
 fcoj <- read.csv('profit_csvs/fcoj_fixed_quantity.csv')
+# fcoj <- read.csv('profit_csvs/fcoj_futures_max_profit.csv')
 
 df <- rbind(ora[, c(1:4, ncol(ora))],
             poj[, c(1:4, ncol(poj))],
@@ -16,6 +18,8 @@ df$product <- sapply(df$product, as.character)
 by.region <- df %>% group_by(region) %>%
     summarise(storage_capacity=sum(predicted_demand))
 
+# These are sanity checks to make sure our current storage is
+# above these capacity demands.
 print('S51 storage capacity: ')
 sum(by.region[by.region$region %in% c('NE', 'MA', 'SE'), 2])
 
@@ -27,7 +31,6 @@ sum(by.region[by.region$region %in% c('NW', 'SW'), 2])
 
 print('S73 storage capacity: ')
 sum(by.region[by.region$region == 'MW', 2])
-
 
 by.region.proc <- df[df$product %in% c('POJ', 'ROJ'), ] %>%
     group_by(region) %>%
@@ -105,6 +108,8 @@ tex.s35
 
 
 # Manufacturing ratios
+# This is unnecessary once we move to 2020, because that will
+# be 
 p02.manu <- sum(df[(df$region %in% c('DS')) &
                    df$product %in% c('POJ'),]$predicted_demand) /
             sum(df[(df$region %in% c('DS')) &

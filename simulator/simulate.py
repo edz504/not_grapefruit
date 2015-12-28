@@ -16,7 +16,7 @@ import time
 # the results .xlsm contains the decision sheets.
 ROOT_DIR = os.path.dirname(os.getcwd())
 
-# FOUR = False
+# FOUR = True
 # if FOUR:
 #     input_file = os.path.join(ROOT_DIR,
 #         'decisions/notgrapefruit2019_4test_tweak.xlsx')
@@ -24,7 +24,7 @@ ROOT_DIR = os.path.dirname(os.getcwd())
 #     input_file = os.path.join(ROOT_DIR,
 #         'decisions/notgrapefruit2019_5test_tweak.xlsx')
 input_file = os.path.join(ROOT_DIR,
-    'decisions/notgrapefruit2018.xlsm')
+    'results/notgrapefruit2018.xlsm')
 
 # We also need the Results file of the previous year in order to
 # initialize the inventory.
@@ -152,7 +152,7 @@ for storage_name, storage in storages.iteritems():
 # (current decision)
 for grove in groves.values():
     new_deliveries, raw_cost, shipping_cost = grove.spot_purchase(
-        0, storages, processing_plants, month_index=0)
+        0, storages, processing_plants)
     deliveries += new_deliveries
     cost['purchase']['raw'] += raw_cost
     cost['transportation']['from_grove'] += shipping_cost
@@ -201,7 +201,6 @@ for grove in groves.values():
                          amount=total_weekly_quantity * prop))
             cost['transportation']['from_grove_futures_fcoj'] += (0.22 *
                     prop * total_weekly_quantity * dist)
-
 
 # Starts at beginning of week 1
 for t in xrange(1, 49):
@@ -414,8 +413,9 @@ for t in xrange(1, 49):
             market_sell = [None] * len(storage.markets)
             inv = storage.get_total_inventory(product)
             total_demand = sum(market_demands)
-            # print '{0}, {1}: inventory = {2}, demand = {3}'.format(
-            #     storage.name, product, inv, total_demand)
+            # if product == 'FCOJ':
+            #     print '{0}, {1}: inventory = {2}, demand = {3}'.format(
+            #         storage.name, product, inv, total_demand)
             storage_name_col.append(storage.name)
             product_name_col.append(product)
             leftover_amount.append(inv - total_demand)
@@ -425,8 +425,8 @@ for t in xrange(1, 49):
                 market_sell = market_demands
                 storage.remove_product(product, total_demand)
                 sales[product] += total_demand
-                print 'Sold {0} of {1} at {2}'.format(total_demand,
-                    product, storage.name)
+                print 'Sold {0} of {1} {2} at {3}'.format(total_demand,
+                    inv, product, storage.name)
 
             else:
                 market_demands_proportions = [d / total_demand
@@ -435,7 +435,7 @@ for t in xrange(1, 49):
                                for p in market_demands_proportions]
                 storage.remove_product(product, inv)
                 sales[product] += inv
-                print 'Sold {0} of {1} at {2}'.format(inv,
+                print '**Sold OUT {0} of {0} {1} at {2}'.format(inv,
                     product, storage.name)
             for i, sale in enumerate(market_sell):
                 price = market.prices[product][month_ind]
@@ -459,7 +459,7 @@ for t in xrange(1, 49):
 
 
 
-# Add in annual costs
+# # Add in annual costs
 cost['purchase']['futures']['ORA'] += decisions['futures']['ORA']['total_price']
 cost['purchase']['futures']['FCOJ'] += decisions['futures']['FCOJ']['total_price']
 cost['maintenance']['storage'] += sum([7.5e6 + 650 * s.capacity

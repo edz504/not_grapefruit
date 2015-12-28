@@ -67,13 +67,6 @@ for (region in regions) {
         # Let's keep everything past price 3, though, because
         # censoring at that level is ineffective anyways.
         this_df[which(this_df$Price >= 3), ]$keep <- TRUE
-
-        # We also keep everything for ORA (not a lot of censored, and
-        # heavily inflated in uncensored places).
-        # if (product == 'ORA') {
-        #     this_df$keep <- TRUE
-        # }
-        # NVM that didn't work
         
         # Fit the model only on clean data
         clean_df <- this_df[this_df$keep, ]
