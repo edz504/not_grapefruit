@@ -2,11 +2,11 @@ This folder contains the code for updating the demand curves and making decision
 
 
 1.
-It uses VBA to create a csv from all past data (MomPop, Practice Rounds, and real rounds) with realized sales for a given price, product, and region.  It also provides a boolean indicating whether or not the sales represent censored demand (0 means clean).
+It uses a Python script to create a csv from all past data (MomPop, Practice Rounds, and real rounds) with realized sales for a given price, product, and region.  It also provides a boolean indicating whether or not the sales represent censored demand (0 means clean).
 
 
 2.
-After the VBA script has been run, we fit demand curves.  We consider all data, but use a local / neighborhood max-based filtering method to filter out possibly censored data.  We use the following model structure for each curve:
+After the Python script has been run, we re-fit demand curves.  We consider all data, but use a local / neighborhood max-based filtering method to filter out possibly censored data.  We use the following model structure for each curve:
 
 D(p) = a / (p ^ 2) + b
 
@@ -22,7 +22,7 @@ For the years from 2021 onwards, the quantity of maturing futures will be the 5-
 
 For example, the optimization might tell us that the profit-maximizing price gives a demanded supply of X FCOJ futures over the whole year.  The trick here is that we're removing the supply constraint under the assumption that the figure we came up with 5 years previous is close enough to the optimal number here that we will have enough.  For example, we're assuming that 5 years ago, the optimal number we came up with using the ROJ/FCOJ script (non-constrained), is approximately (or, in a worse case, more than) the amount X that our current beliefs tell us is optimal.
 
-Note that pre-2021, we still need to run the find_optimal_prices_ROJ_FCOJ.R script in order to obtain our 5 year ahead beliefs for the optimal quantity to order.
+Note that pre-2021, we still need to run the find_optimal_prices_FCOJ_ROJ.R script in order to obtain our 5 year ahead beliefs for the optimal quantity to order.
 
 We need to determine a policy for both cases of our 5-years-ago ordered quantity not matching current optimal beliefs: both in cases where supply is more than demand, and vice versa.
 
@@ -30,16 +30,29 @@ We need to determine a policy for both cases of our 5-years-ago ordered quantity
 Data wrangling, aggregation, and calculation to find the actual proportions and insert them into our decisions spreadsheet.
 
 6.
+Add beta price adjustments to our initial decisions spreadsheet.
+
+7.
 Run simulator and tune the prices.
+
+8.
+Update pricing adjustment beliefs.
 
 ======
 Pipeline
 1.  CollectSalesAcrossYears.py
 2.  demand_fit_plot.R
 3.  create_demand_table.R
-4.  find_optimal_prices_ORA_POJ_ROJ.R,   ** non-constrained
-    find_optimal_prices_FCOJ_fixed.R     ** constrained
-    find_optimal_prices_ROJ_FCOJ.R       ** non-constrained
+4.  find_optimal_prices_ORA_POJ_ROJ.R,             ** non-constrained
+    find_optimal_prices_FCOJ_constrained.R         ** constrained
+    find_optimal_prices_FCOJ_ROJ.R                 ** non-constrained
+    find_optimal_prices_FCOJ_ROJ_constrained.R     ** constrained
+
     # Note, need to update the futures prices in these scripts.
-5.  calculate_and_write_decisions.py
-6.  simulate.py
+
+5.  Copy blank decisions spreadsheet into folder, rename notgrapefruit20XX_init.xlsm
+    calculate_and_write_decisions.py
+6.  Copy notgrapefruit20XX_init.xlsm, rename notgrapefruit20XX.xlsm
+    adjust_prices.py
+7.  simulate.py (sanity check + fine tuning)
+8.  update_pricing_adjustments.py

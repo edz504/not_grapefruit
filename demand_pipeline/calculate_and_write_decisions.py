@@ -9,7 +9,7 @@ ROOT_DIR = os.path.dirname(os.getcwd())
 # Set up workbook to write to.
 wb = Workbook(
     os.path.join(ROOT_DIR,
-                 'decisions/notgrapefruit2019.xlsm'),
+                 'decisions/notgrapefruit2019_init.xlsm'),
               app_visible=False)
 
 
@@ -391,4 +391,4 @@ Range('pricing', 'D39:O39').value = [float(
     df[(df['region'] == 'SW') &
        (df['product'] == 'FCOJ')]['price'])] * 12
 
-# Need to save and close!!
+wb.save()

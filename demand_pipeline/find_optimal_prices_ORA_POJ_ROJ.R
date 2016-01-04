@@ -34,8 +34,8 @@ ora.df$weekly_transp_cost <- ora.df$weekly_demand *
 # Also include cost to buy capacity and maintain necessary
 # storage. There's a one-time upgrade cost and an every-year
 # maintenance. Divide the one-time cost by 48 to "week-ize" it.
-ora.df$weekly_storage_build <- 6000 * ora.df$weekly_demand / 48
-ora.df$weekly_storage_maint <- (650 * ora.df$weekly_demand) / 48
+# ora.df$weekly_storage_build <- 6000 * ora.df$weekly_demand / 48
+# ora.df$weekly_storage_maint <- (650 * ora.df$weekly_demand) / 48
 # ^ Note that we do not account for the 7.5m * 4 because it will
 # be present at every price (add in at end).
 
@@ -66,16 +66,16 @@ ora.df$raw_material_cost <- ora.df$weekly_demand * 2000 * c(
 # Note: this "profit" is for the first year, actual profit
 # should be even higher in later years when we don't have the
 # capacity cost.
-ora.df$year1_profit <- ora.df$revenue - (ora.df$weekly_transp_cost +
-    ora.df$weekly_storage_build + ora.df$weekly_storage_maint +
-    ora.df$raw_material_cost)
+# ora.df$year1_profit <- ora.df$revenue - (ora.df$weekly_transp_cost +
+#     ora.df$weekly_storage_build + ora.df$weekly_storage_maint +
+#     ora.df$raw_material_cost)
 ora.df$profit <- ora.df$revenue - (ora.df$weekly_transp_cost +
-    ora.df$weekly_storage_maint +
+    # ora.df$weekly_storage_maint +
     ora.df$raw_material_cost)
 ggplot(ora.df, aes(x=price, colour=region)) +
-    geom_line(aes(y=year1_profit), linetype='dotted') +
+    # geom_line(aes(y=year1_profit), linetype='dotted') +
     geom_line(aes(y=profit)) +
-    ggtitle('ORA Profit (Year 1 and After)')
+    ggtitle('ORA Profit')
 ggsave('profit_curves/ora_profit.png', width=10, height=6)
 
 ora.profit.max <- ora.df %>% group_by(region) %>%
@@ -127,8 +127,8 @@ poj.df$p_s_dist <- c(rep(317, 903),
 # cost, and then add the weekly traveling cost.  We'll spread the
 # one time purchase cost over weeks by dividing it by 48.
 poj.df$num_tanker_cars_needed <- 2 * poj.df$weekly_demand / 30
-poj.df$tanker_car_weekly_purchase_cost <- 
-    poj.df$num_tanker_cars_needed * 100000 / 48
+# poj.df$tanker_car_weekly_purchase_cost <- 
+#     poj.df$num_tanker_cars_needed * 100000 / 48
 poj.df$tanker_car_weekly_travel_cost <- 36 *
     0.5 * poj.df$num_tanker_cars_needed * poj.df$p_s_dist
 poj.df$tanker_car_weekly_hold_cost <- 10 *
@@ -141,13 +141,13 @@ poj.df$storage_market_weekly_cost <- 1.2 * poj.df$weekly_demand *
 # Also include cost to buy capacity and maintain necessary
 # processing. There's a one-time upgrade cost and an every-year
 # maintenance. Divide the one-time cost by 48 to "week-ize" it.
-poj.df$weekly_proc_build <- 8000 * poj.df$weekly_demand / 48
-poj.df$weekly_proc_maint <- (2500 * poj.df$weekly_demand) / 48
+# poj.df$weekly_proc_build <- 8000 * poj.df$weekly_demand / 48
+# poj.df$weekly_proc_maint <- (2500 * poj.df$weekly_demand) / 48
 # Note that we do not add in the $8m * 4 processing maintenance,
 # because it will be there for all prices (and we're 2x-counting it
 # for the other products)
-poj.df$weekly_storage_build <- 6000 * poj.df$weekly_demand / 48
-poj.df$weekly_storage_maint <- (650 * poj.df$weekly_demand) / 48
+# poj.df$weekly_storage_build <- 6000 * poj.df$weekly_demand / 48
+# poj.df$weekly_storage_maint <- (650 * poj.df$weekly_demand) / 48
 
 poj.df$manufacturing_cost <- 2000 * poj.df$weekly_demand
 
@@ -161,34 +161,31 @@ poj.df$raw_material_cost <- poj.df$weekly_demand * 2000 * c(
         2 * 301))
 
 
-poj.df$year1_profit <- poj.df$revenue - (
-    poj.df$tanker_car_weekly_purchase_cost +
+poj.df$profit <- poj.df$revenue - (
+    # poj.df$tanker_car_weekly_purchase_cost +
     poj.df$tanker_car_weekly_travel_cost +
     poj.df$tanker_car_weekly_hold_cost +
     poj.df$g_p_weekly_cost +
     poj.df$storage_market_weekly_cost +
     poj.df$manufacturing_cost +
-    poj.df$weekly_proc_build +
-    poj.df$weekly_proc_maint +
-    poj.df$raw_material_cost +
-    poj.df$weekly_storage_build +
-    poj.df$weekly_storage_maint)
-poj.df$profit <- poj.df$year1_profit + (
-     poj.df$tanker_car_weekly_purchase_cost +
-     poj.df$weekly_proc_build +
-     poj.df$weekly_storage_build
-     )
+    # poj.df$weekly_proc_build +
+    # poj.df$weekly_proc_maint +
+    poj.df$raw_material_cost)
+# poj.df$profit <- poj.df$year1_profit + (
+#      poj.df$tanker_car_weekly_purchase_cost +
+#      poj.df$weekly_proc_build +
+#      poj.df$weekly_storage_build
+#      )
 ggplot(poj.df, aes(x=price, colour=region)) +
-    geom_line(aes(y=year1_profit), linetype='dotted') +
+    # geom_line(aes(y=year1_profit), linetype='dotted') +
     geom_line(aes(y=profit)) +
-    ggtitle('POJ Profit (Year 1 and After)')
+    ggtitle('POJ Profit')
 ggsave('profit_curves/poj_profit.png', width=10, height=6)
 
 poj.profit.max <- poj.df %>% group_by(region) %>%
     filter(profit == max(profit))
 write.csv(poj.profit.max, file='profit_csvs/poj_max_profit.csv',
           quote=FALSE, row.names=FALSE)
-
 
 
 #### The other two products are price-optimized using futures
@@ -236,8 +233,8 @@ roj.df$p_s_dist <- c(rep(317, 903),
 # cost, and then add the weekly traveling cost.  We'll spread the
 # one time purchase cost over weeks by dividing it by 48.
 roj.df$num_tanker_cars_needed <- 2 * roj.df$weekly_demand / 30
-roj.df$tanker_car_weekly_purchase_cost <- 
-    roj.df$num_tanker_cars_needed * 100000 / 48
+# roj.df$tanker_car_weekly_purchase_cost <- 
+#     roj.df$num_tanker_cars_needed * 100000 / 48
 roj.df$tanker_car_weekly_travel_cost <- 36 *
     0.5 * roj.df$num_tanker_cars_needed * roj.df$p_s_dist
 roj.df$tanker_car_weekly_hold_cost <- 10 *
@@ -247,10 +244,10 @@ roj.df$g_p_weekly_cost <- 0.22 * roj.df$weekly_demand * roj.df$g_p_dist
 roj.df$storage_market_weekly_cost <- 1.2 * roj.df$weekly_demand *
     roj.df$storage_dist
 
-roj.df$weekly_storage_build <- 6000 * roj.df$weekly_demand / 48
-roj.df$weekly_storage_maint <- (650 * roj.df$weekly_demand) / 48
-roj.df$weekly_proc_build <- 8000 * roj.df$weekly_demand / 48
-roj.df$weekly_proc_maint <- (2500 * roj.df$weekly_demand) / 48
+# roj.df$weekly_storage_build <- 6000 * roj.df$weekly_demand / 48
+# roj.df$weekly_storage_maint <- (650 * roj.df$weekly_demand) / 48
+# roj.df$weekly_proc_build <- 8000 * roj.df$weekly_demand / 48
+# roj.df$weekly_proc_maint <- (2500 * roj.df$weekly_demand) / 48
 
 # Reconstitution cost
 roj.df$reconstitution_cost <- 650 * roj.df$weekly_demand
@@ -268,28 +265,26 @@ roj.df$raw_material_cost <- roj.df$weekly_demand * 2000 * c(
 # FCOJ to get ROJ (assume no futures).
 roj.df$manufacturing_cost <- 2000 * roj.df$weekly_demand
 
-roj.df$year1_profit <- roj.df$revenue - (
-    roj.df$tanker_car_weekly_purchase_cost +
+roj.df$profit <- roj.df$revenue - (
+    # roj.df$tanker_car_weekly_purchase_cost +
     roj.df$tanker_car_weekly_travel_cost +
     roj.df$tanker_car_weekly_hold_cost +
     roj.df$g_p_weekly_cost +
     roj.df$storage_market_weekly_cost +
     roj.df$manufacturing_cost +
     roj.df$reconstitution_cost +
-    roj.df$weekly_proc_build +
-    roj.df$weekly_proc_maint +
-    roj.df$raw_material_cost +
-    roj.df$weekly_storage_build +
-    roj.df$weekly_storage_maint)
-roj.df$profit <- roj.df$year1_profit + (
-     roj.df$tanker_car_weekly_purchase_cost +
-     roj.df$weekly_proc_build +
-     roj.df$weekly_storage_build
-     )
+    # roj.df$weekly_proc_build +
+    # roj.df$weekly_proc_maint +
+    roj.df$raw_material_cost)
+# roj.df$profit <- roj.df$year1_profit + (
+#      roj.df$tanker_car_weekly_purchase_cost +
+#      roj.df$weekly_proc_build +
+#      roj.df$weekly_storage_build
+#      )
 ggplot(roj.df, aes(x=price, y=profit, colour=region)) +
-    geom_line(aes(y=year1_profit), linetype='dotted') +
+    # geom_line(aes(y=year1_profit), linetype='dotted') +
     geom_line(aes(y=profit)) +
-    ggtitle('ROJ Profit (Year 1 and After)')
+    ggtitle('ROJ Profit')
 ggsave('profit_curves/roj_profit.png', width=10, height=6)
 
 roj.profit.max <- roj.df %>% group_by(region) %>%

@@ -39,23 +39,22 @@ fcoj.df$storage.to.market.cost <- 1.2 *
     fcoj.df$weekly_demand *
     fcoj.df$storage.to.market
 
-fcoj.df$weekly_storage_build <- 6000 * fcoj.df$weekly_demand / 48
-fcoj.df$weekly_storage_maint <- (650 * fcoj.df$weekly_demand) / 48
+# fcoj.df$weekly_storage_build <- 6000 * fcoj.df$weekly_demand / 48
+# fcoj.df$weekly_storage_maint <- (650 * fcoj.df$weekly_demand) / 48
 
 fcoj.df$purchase_cost <- fcoj.df$weekly_demand * 2000 * FCOJ.FUTURE.PRICE
 
-fcoj.df$year1_profit <- fcoj.df$revenue - (
+fcoj.df$profit <- fcoj.df$revenue - (
     fcoj.df$fla.to.storage.cost +
     fcoj.df$storage.to.market.cost +
-    fcoj.df$weekly_storage_build +
-    fcoj.df$weekly_storage_maint +
+    # fcoj.df$weekly_storage_build +
+    # fcoj.df$weekly_storage_maint +
     fcoj.df$purchase_cost)
-fcoj.df$profit <- fcoj.df$year1_profit +
-    fcoj.df$weekly_storage_build
+# fcoj.df$profit <- fcoj.df$year1_profit +
+#     fcoj.df$weekly_storage_build
 ggplot(fcoj.df, aes(x=price, y=profit, colour=region)) +
-    geom_line(aes(y=year1_profit), linetype='dotted') +
     geom_line(aes(y=profit)) +
-    ggtitle('FCOJ Futures Profit (Year 1 and After)')
+    ggtitle('FCOJ Futures Profit')
 ggsave('profit_curves/fcoj_futures_profit.png',
        width=10, height=6)
 
@@ -98,25 +97,25 @@ roj.df$storage.to.market.cost <- 1.2 *
     roj.df$weekly_demand *
     roj.df$storage.to.market
 
-roj.df$weekly_storage_build <- 6000 * roj.df$weekly_demand / 48
-roj.df$weekly_storage_maint <- (650 * roj.df$weekly_demand) / 48
+# roj.df$weekly_storage_build <- 6000 * roj.df$weekly_demand / 48
+# roj.df$weekly_storage_maint <- (650 * roj.df$weekly_demand) / 48
 
 roj.df$purchase_cost <- roj.df$weekly_demand * 2000 * FCOJ.FUTURE.PRICE
 roj.df$reconstitution_cost <- roj.df$weekly_demand * 650
 
-roj.df$year1_profit <- roj.df$revenue - (
+roj.df$profit <- roj.df$revenue - (
     roj.df$fla.to.storage.cost +
     roj.df$storage.to.market.cost +
-    roj.df$weekly_storage_build +
-    roj.df$weekly_storage_maint +
+    # roj.df$weekly_storage_build +
+    # roj.df$weekly_storage_maint +
     roj.df$purchase_cost +
     roj.df$reconstitution_cost)
-roj.df$profit <- roj.df$year1_profit +
-    roj.df$weekly_storage_build
+# roj.df$profit <- roj.df$year1_profit +
+#     roj.df$weekly_storage_build
 ggplot(roj.df, aes(x=price, y=profit, colour=region)) +
-    geom_line(aes(y=year1_profit), linetype='dotted') +
+    # geom_line(aes(y=year1_profit), linetype='dotted') +
     geom_line(aes(y=profit)) +
-    ggtitle('ROJ Futures Profit (Year 1 and After)')
+    ggtitle('ROJ Futures Profit')
 ggsave('profit_curves/roj_futures_profit.png', width=10, height=6)
 
 roj.profit.max <- roj.df %>% group_by(region) %>%

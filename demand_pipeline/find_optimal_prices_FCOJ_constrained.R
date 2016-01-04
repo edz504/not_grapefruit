@@ -5,6 +5,8 @@ all.demands <- read.csv('all_predicted_demands.csv',
     stringsAsFactors=FALSE)
 fcoj.demands <- all.demands[all.demands$product == 'FCOJ', ]
 
+FCOJ.FUTURE.PRICE <- 0.961788527
+
 fcoj.demands$weekly_revenue <- fcoj.demands$price *
     fcoj.demands$predicted_demand * 2000
 fla.to.s35 <- 1522
@@ -29,19 +31,22 @@ fcoj.demands$storage.to.market.cost <- 1.2 *
     fcoj.demands$predicted_demand *
     fcoj.demands$storage.to.market
 
+fcoj.demands$purchase_cost <- fcoj.demands$predicted_demand * 2000 * FCOJ.FUTURE.PRICE
+
 fcoj.demands$profit <- fcoj.demands$weekly_revenue - (
     fcoj.demands$fla.to.storage.cost +
-    fcoj.demands$storage.to.market.cost)
+    fcoj.demands$storage.to.market.cost +
+    fcoj.demands$purchase_cost)
 
-opt <- fcoj.demands %>%
-    group_by(region) %>%
-        filter(profit==max(profit)) %>%
-            select(region, price,
-                   predicted_demand, weekly_revenue,
-                   profit)
+# opt <- fcoj.demands %>%
+#     group_by(region) %>%
+#         filter(profit==max(profit)) %>%
+#             select(region, price,
+#                    predicted_demand, weekly_revenue,
+#                    profit)
 
-print('Profit - purchase cost')
-sum(opt$profit) - (1.12847 * 136000 * 2000 / 48)
+# print('Profit - purchase cost')
+# sum(opt$profit) - (1.12847 * 136000 * 2000 / 48)
 
 # The above needs to be constrained by our supply, which
 # need to sum to less than 2834, the weekly incoming supply.
@@ -50,32 +55,39 @@ sum(opt$profit) - (1.12847 * 136000 * 2000 / 48)
 # (NE, MA, SE, MW, DS, NW, SW) and returns a dataframe
 # with the relevant revenue and profit.
 get.profits <- function(region.prices) {
-    ind1 <- which(fcoj.demands$region == 'NE' &
-                  fcoj.demands$price == region.prices[1])
-    ind2 <- which(fcoj.demands$region == 'MA' &
-                  fcoj.demands$price == region.prices[2])
-    ind3 <- which(fcoj.demands$region == 'SE' &
-                  fcoj.demands$price == region.prices[3])
-    ind4 <- which(fcoj.demands$region == 'MW' &
-                  fcoj.demands$price == region.prices[4])
-    ind5 <- which(fcoj.demands$region == 'DS' &
-                  fcoj.demands$price == region.prices[5])
-    ind6 <- which(fcoj.demands$region == 'NW' &
-                  fcoj.demands$price == region.prices[6])
-    ind7 <- which(fcoj.demands$region == 'SW' &
-                  fcoj.demands$price == region.prices[7])
+    # ind1 <- which(fcoj.demands$region == 'NE' &
+    #               fcoj.demands$price == region.prices[1])
+    # ind2 <- which(fcoj.demands$region == 'MA' &
+    #               fcoj.demands$price == region.prices[2])
+    # ind3 <- which(fcoj.demands$region == 'SE' &
+    #               fcoj.demands$price == region.prices[3])
+    # ind4 <- which(fcoj.demands$region == 'MW' &
+    #               fcoj.demands$price == region.prices[4])
+    # ind5 <- which(fcoj.demands$region == 'DS' &
+    #               fcoj.demands$price == region.prices[5])
+    # ind6 <- which(fcoj.demands$region == 'NW' &
+    #               fcoj.demands$price == region.prices[6])
+    # ind7 <- which(fcoj.demands$region == 'SW' &
+    #               fcoj.demands$price == region.prices[7])
+    ind1 <- (region.prices[1] - 1) / 0.01 + 1
+    ind2 <- (region.prices[2] - 1) / 0.01 + 302
+    ind3 <- (region.prices[3] - 1) / 0.01 + 603
+    ind4 <- (region.prices[4] - 1) / 0.01 + 904
+    ind5 <- (region.prices[5] - 1) / 0.01 + 1205
+    ind6 <- (region.prices[6] - 1) / 0.01 + 1506
+    ind7 <- (region.prices[7] - 1) / 0.01 + 1807
     return(fcoj.demands[c(ind1, ind2, ind3, ind4, ind5, ind6, ind7),
                         c(1, 3, 4, 5, ncol(fcoj.demands))])
 }
 
-f <- function(region.prices) {
-    df <- get.profits(region.prices)
-    return(sum(df$profit))
-}
-g <- function(region.prices) {
-    df <- get.profits(region.prices)
-    return(sum(df$predicted_demand))
-}
+# f <- function(region.prices) {
+#     df <- get.profits(region.prices)
+#     return(sum(df$profit))
+# }
+# g <- function(region.prices) {
+#     df <- get.profits(region.prices)
+#     return(sum(df$predicted_demand))
+# }
 
 get.obj.const <- function(region.prices) {
     df <- get.profits(region.prices)
@@ -83,8 +95,8 @@ get.obj.const <- function(region.prices) {
              sum(df$predicted_demand)))
 }
 
-# We run 100k iterations, sampling random prices
-ITER <- 100000
+# We run 500,000 iterations, sampling random prices
+ITER <- 500000
 profits <- rep(NA, ITER)
 
 # This constraint depends on our quantity of maturing contracts

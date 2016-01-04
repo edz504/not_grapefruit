@@ -127,4 +127,4 @@ for myFileIndex in range(0,fileCount):
 
 # write the cumulative data frame object to CSV
 print 'Iterated through data from years ' + str(minYear) + ' to ' + str(maxYear) + '.'
-df.to_csv('sales_test.csv', index=False)
+df.to_csv('sales.csv', index=False)
