@@ -24,7 +24,7 @@ ROOT_DIR = os.path.dirname(os.getcwd())
 #     input_file = os.path.join(ROOT_DIR,
 #         'decisions/notgrapefruit2019_5test_tweak.xlsx')
 input_file = os.path.join(ROOT_DIR,
-    'decisions/notgrapefruit2019_tune.xlsm')
+    'decisions/notgrapefruit2019.xlsm')
 
 # We also need the Results file of the previous year in order to
 # initialize the inventory.
