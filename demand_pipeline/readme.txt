@@ -24,15 +24,22 @@ For example, the optimization might tell us that the profit-maximizing price giv
 
 Note that pre-2021, we still need to run the find_optimal_prices_ROJ_FCOJ.R script in order to obtain our 5 year ahead beliefs for the optimal quantity to order.
 
+We need to determine a policy for both cases of our 5-years-ago ordered quantity not matching current optimal beliefs: both in cases where supply is more than demand, and vice versa.
 
 5.
+Data wrangling, aggregation, and calculation to find the actual proportions and insert them into our decisions spreadsheet.
 
+6.
+Run simulator and tune the prices.
 
 ======
 Pipeline
-1.  John's VBA or, hopefully, rewritten Python
+1.  CollectSalesAcrossYears.py
 2.  demand_fit_plot.R
 3.  create_demand_table.R
 4.  find_optimal_prices_ORA_POJ_ROJ.R,   ** non-constrained
     find_optimal_prices_FCOJ_fixed.R     ** constrained
     find_optimal_prices_ROJ_FCOJ.R       ** non-constrained
+    # Note, need to update the futures prices in these scripts.
+5.  calculate_and_write_decisions.py
+6.  simulate.py

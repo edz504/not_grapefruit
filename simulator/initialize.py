@@ -7,7 +7,7 @@ from utilities import *
 from xlwings import Workbook, Range
 
 def initialize_inventory(input_file):
-    wb = Workbook(input_file)
+    wb = Workbook(input_file, app_visible=False)
     inv = {}
     scheduled_to_ship_in = {}
     num_storages = int(Range('basic_info', 'D8').value)
@@ -76,13 +76,14 @@ def initialize(input_file, initial_inventory):
     markets = {}
     ROOT_DIR = os.path.dirname(os.getcwd())
     wb = Workbook(
-        os.path.join(ROOT_DIR,'reference/StaticData-mod.xlsx'))
+        os.path.join(ROOT_DIR,'reference/StaticData-mod.xlsx'),
+        app_visible=False)
     market_names = Range(
         'S->M', 'A2:B101', atleast_2d=True).value
     demand_coef_df = pd.read_csv(
         os.path.join(ROOT_DIR,
                      'demand_pipeline/demand_fit_coefs.csv'))
-    wb = Workbook(input_file)
+    wb = Workbook(input_file, app_visible=False)
     for val in market_names:
         name = val[1]
         region = val[0]
@@ -110,7 +111,8 @@ def initialize(input_file, initial_inventory):
     # distance matrix from the static data file, and then initialize the
     # storages.
     wb = Workbook(
-        os.path.join(ROOT_DIR,'reference/StaticData-mod.xlsx'))
+        os.path.join(ROOT_DIR,'reference/StaticData-mod.xlsx'),
+        app_visible=False)
     D_sm = pd.DataFrame(np.array(
         Range('S->M', 'C2:BU101', atleast_2d=True).value),
                         columns=Range('S->M', 'C1:BU1').value,
@@ -126,7 +128,7 @@ def initialize(input_file, initial_inventory):
                          columns=Range('G->PS', 'B1:E1').value,
                          index=Range('G->PS', 'A2:A82').value)
 
-    wb = Workbook(input_file)
+    wb = Workbook(input_file, app_visible=False)
     # Initialize Storage Systems
     all_storage_names = Range('facilities', 'B36:B106').value
     num_storages = int(Range('facilities', 'D107').value)

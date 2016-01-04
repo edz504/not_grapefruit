@@ -5,6 +5,7 @@ all.predicted.demands <- read.csv(
     'all_predicted_demands.csv',
     stringsAsFactors=FALSE)
 
+FCOJ.FUTURE.PRICE <- 0.961788527
 
 # FCOJ
 fcoj.df <- all.predicted.demands[
@@ -41,7 +42,7 @@ fcoj.df$storage.to.market.cost <- 1.2 *
 fcoj.df$weekly_storage_build <- 6000 * fcoj.df$weekly_demand / 48
 fcoj.df$weekly_storage_maint <- (650 * fcoj.df$weekly_demand) / 48
 
-fcoj.df$purchase_cost <- fcoj.df$weekly_demand * 2000 * 0.91
+fcoj.df$purchase_cost <- fcoj.df$weekly_demand * 2000 * FCOJ.FUTURE.PRICE
 
 fcoj.df$year1_profit <- fcoj.df$revenue - (
     fcoj.df$fla.to.storage.cost +
@@ -100,7 +101,7 @@ roj.df$storage.to.market.cost <- 1.2 *
 roj.df$weekly_storage_build <- 6000 * roj.df$weekly_demand / 48
 roj.df$weekly_storage_maint <- (650 * roj.df$weekly_demand) / 48
 
-roj.df$purchase_cost <- roj.df$weekly_demand * 2000 * 0.91
+roj.df$purchase_cost <- roj.df$weekly_demand * 2000 * FCOJ.FUTURE.PRICE
 roj.df$reconstitution_cost <- roj.df$weekly_demand * 650
 
 roj.df$year1_profit <- roj.df$revenue - (
