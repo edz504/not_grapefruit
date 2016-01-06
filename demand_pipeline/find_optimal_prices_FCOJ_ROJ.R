@@ -5,7 +5,8 @@ all.predicted.demands <- read.csv(
     'all_predicted_demands.csv',
     stringsAsFactors=FALSE)
 
-FCOJ.FUTURE.PRICE <- 0.961788527
+args <- commandArgs(trailingOnly = TRUE)
+FCOJ.FUTURE.PRICE <- as.float(args[1])
 
 # FCOJ
 fcoj.df <- all.predicted.demands[

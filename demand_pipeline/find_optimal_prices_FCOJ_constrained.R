@@ -5,7 +5,11 @@ all.demands <- read.csv('all_predicted_demands.csv',
     stringsAsFactors=FALSE)
 fcoj.demands <- all.demands[all.demands$product == 'FCOJ', ]
 
-FCOJ.FUTURE.PRICE <- 0.961788527
+args <- commandArgs(trailingOnly = TRUE)
+ITER <- as.integer(args[1])
+NUM_FUTURES <- as.integer(args[2])
+WEEKS <- as.integer(args[3])
+FCOJ.FUTURE.PRICE <- as.float(args[4])
 
 fcoj.demands$weekly_revenue <- fcoj.demands$price *
     fcoj.demands$predicted_demand * 2000
@@ -96,7 +100,6 @@ get.obj.const <- function(region.prices) {
 }
 
 # We run 500,000 iterations, sampling random prices
-ITER <- 500000
 profits <- rep(NA, ITER)
 
 # This constraint depends on our quantity of maturing contracts
@@ -104,7 +107,7 @@ profits <- rep(NA, ITER)
 # can have them arrive through.  Usually this is 48, but for
 # years where we need to clear out in the first month and avoid
 # inventory problems, we set it to 44.
-CONSTRAINT <- 136000 / 48
+CONSTRAINT <- NUM_FUTURES / WEEKS
 prices.mat <- matrix(NA, ITER, 7)
 for (i in 1:ITER) {
   prices <- round(runif(7, 1, 4), 2)

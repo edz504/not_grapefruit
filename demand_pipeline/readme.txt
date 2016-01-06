@@ -40,8 +40,16 @@ Update pricing adjustment beliefs.
 
 ======
 Pipeline
-1.  CollectSalesAcrossYears.py
+1.  CollectSalesDataAcrossYears.py
+    
+    # Note, should modify to only add new year instead of going through all years
+    # each time.
+
 2.  demand_fit_plot.R
+
+    # Note, should pass visualize as command line argument to prevent ggplot from
+    # plotting and saving.
+
 3.  create_demand_table.R
 4.  find_optimal_prices_ORA_POJ_ROJ.R,             ** non-constrained
     find_optimal_prices_FCOJ_constrained.R         ** constrained

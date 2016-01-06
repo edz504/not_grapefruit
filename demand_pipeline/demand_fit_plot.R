@@ -1,6 +1,9 @@
 library(dplyr)
 library(ggplot2)
-# library(MASS)
+
+# Visualize option
+args <- commandArgs(trailingOnly = TRUE)
+PLOT_AND_SAVE <- as.integer(args[1])
 
 sales_df <- read.csv('sales.csv', stringsAsFactors=FALSE)
 sales_df$weekly_sales <- sales_df$Sales / 4
@@ -75,14 +78,17 @@ for (region in regions) {
         # Save the coefficients
         coef_fit_df[j, ] <- c(model$coef, region, product)
         j <- j + 1
-        # Predict and plot on all prices.
-        this_df$pred <- predict(model, this_df)
-        ggplot(this_df, aes(x=Price)) +
-            geom_point(aes(y=weekly_sales, colour=keep)) +
-            geom_line(aes(y=pred))
-        ggsave(paste('sales_and_fits_plots/', product, '_',
-                      region, '.png', sep=''),
-               width=10, height=6)
+
+        if (PLOT_AND_SAVE) {
+            # Predict and plot on all prices.
+            this_df$pred <- predict(model, this_df)
+            ggplot(this_df, aes(x=Price)) +
+                geom_point(aes(y=weekly_sales, colour=keep)) +
+                geom_line(aes(y=pred))
+            ggsave(paste('sales_and_fits_plots/', product, '_',
+                          region, '.png', sep=''),
+                   width=10, height=6)
+        }
     }
 }
 

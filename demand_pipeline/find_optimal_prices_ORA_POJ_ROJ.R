@@ -20,7 +20,6 @@ ora.df$grove_dist <- c(rep(s51.grove.dist, 903),
                        rep(s59.grove.dist, 602))
 
 # We have 301 rows per region (in the order NE, MA, SE, MW, DS, NW, SW)
-region.storage <- read.csv('region_storage_dists_opt.csv')
 ora.df$storage_dist <- c(rep(479.1429, 301),
                          rep(286.7647, 301),
                          rep(712.1667, 301),
