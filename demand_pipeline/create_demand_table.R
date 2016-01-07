@@ -1,5 +1,3 @@
-library(ggplot2)
-
 demands.df <- read.csv('demand_fit_coefs.csv',
     stringsAsFactors = FALSE)
 p.vec <- seq(1, 4, by=0.01)

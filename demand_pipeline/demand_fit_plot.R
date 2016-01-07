@@ -1,5 +1,5 @@
-library(dplyr)
-library(ggplot2)
+suppressMessages(library(dplyr))
+suppressMessages(library(ggplot2))
 
 # Visualize option
 args <- commandArgs(trailingOnly = TRUE)

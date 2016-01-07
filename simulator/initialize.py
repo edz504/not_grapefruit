@@ -69,6 +69,8 @@ def initialize_inventory(input_file):
             'FCOJ': Range(name, 'AZ15').value
         }
 
+    # wb.close()
+    
     return inv, scheduled_to_ship_in
 
 def initialize(input_file, initial_inventory):
@@ -83,6 +85,7 @@ def initialize(input_file, initial_inventory):
     demand_coef_df = pd.read_csv(
         os.path.join(ROOT_DIR,
                      'demand_pipeline/demand_fit_coefs.csv'))
+    # wb.close()
     wb = Workbook(input_file, app_visible=False)
     for val in market_names:
         name = val[1]
@@ -110,6 +113,7 @@ def initialize(input_file, initial_inventory):
     # To find the closest storage for each market, we need to retrieve the
     # distance matrix from the static data file, and then initialize the
     # storages.
+    # wb.close()
     wb = Workbook(
         os.path.join(ROOT_DIR,'reference/StaticData-mod.xlsx'),
         app_visible=False)
@@ -127,7 +131,7 @@ def initialize(input_file, initial_inventory):
         Range('G->PS', 'B2:E82', atleast_2d=True).value),
                          columns=Range('G->PS', 'B1:E1').value,
                          index=Range('G->PS', 'A2:A82').value)
-
+    # wb.close()
     wb = Workbook(input_file, app_visible=False)
     # Initialize Storage Systems
     all_storage_names = Range('facilities', 'B36:B106').value
@@ -357,4 +361,5 @@ def initialize(input_file, initial_inventory):
         'arrivals': arrivals
     } # Note no shipping like for FCOJ -- it's stored in the FLA Grove object.
 
+    # wb.close()
     return storages, processing_plants, groves, markets, decisions

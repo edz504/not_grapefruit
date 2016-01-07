@@ -1,5 +1,5 @@
-library(ggplot2)
-library(dplyr)
+suppressMessages(library(ggplot2))
+suppressMessages(library(dplyr))
 
 all.predicted.demands <- read.csv('all_predicted_demands.csv',
     stringsAsFactors=FALSE)
@@ -187,109 +187,110 @@ write.csv(poj.profit.max, file='profit_csvs/poj_max_profit.csv',
           quote=FALSE, row.names=FALSE)
 
 
-#### The other two products are price-optimized using futures
+#### The other two products are price-optimized using futures, so
+#### this section is no longer relevant.
 
-# ROJ
-roj.df <- all.predicted.demands[all.predicted.demands$product == 'ROJ',]
-roj.df <- roj.df %>%
-    mutate(revenue=2000 * price * predicted_demand,
-           weekly_demand = predicted_demand)
+# # ROJ
+# roj.df <- all.predicted.demands[all.predicted.demands$product == 'ROJ',]
+# roj.df <- roj.df %>%
+#     mutate(revenue=2000 * price * predicted_demand,
+#            weekly_demand = predicted_demand)
 
-# Add storage to market distances
-roj.df$storage_dist <- c(rep(479.1429, 301),
-                         rep(286.7647, 301),
-                         rep(712.1667, 301),
-                         rep(368.5909, 301),
-                         rep(413.3750, 301),
-                         rep(659.1250, 301),
-                         rep(659, 301))
+# # Add storage to market distances
+# roj.df$storage_dist <- c(rep(479.1429, 301),
+#                          rep(286.7647, 301),
+#                          rep(712.1667, 301),
+#                          rep(368.5909, 301),
+#                          rep(413.3750, 301),
+#                          rep(659.1250, 301),
+#                          rep(659, 301))
 
-# Instead of grove to storage, now we have grove to plant and
-# plant to storage distances.  We can make similar "efficiency"
-# assumptions, where P2->S35, P3->S51, P5->S59, P9->S73.
-# We'll ship raw ORA from TEX->P2, CAL->P5, FLA->P3, FLA->P9.
+# # Instead of grove to storage, now we have grove to plant and
+# # plant to storage distances.  We can make similar "efficiency"
+# # assumptions, where P2->S35, P3->S51, P5->S59, P9->S73.
+# # We'll ship raw ORA from TEX->P2, CAL->P5, FLA->P3, FLA->P9.
 
-# TEX->P2 = 381
-# CAL->P5 = 351
-# FLA->P3 = 773
-# FLA->P9 = 1528
-roj.df$g_p_dist <- c(rep(773, 903),
-                     rep(1528, 301),
-                     rep(381, 301),
-                     rep(351, 602))
+# # TEX->P2 = 381
+# # CAL->P5 = 351
+# # FLA->P3 = 773
+# # FLA->P9 = 1528
+# roj.df$g_p_dist <- c(rep(773, 903),
+#                      rep(1528, 301),
+#                      rep(381, 301),
+#                      rep(351, 602))
 
-# P2 -> S35 = 140
-# P3 -> S51 = 317
-# P5 -> S59 = 393
-# P9 -> S73 = 98
+# # P2 -> S35 = 140
+# # P3 -> S51 = 317
+# # P5 -> S59 = 393
+# # P9 -> S73 = 98
 
-roj.df$p_s_dist <- c(rep(317, 903),
-                     rep(98, 301),
-                     rep(140, 301),
-                     rep(393, 602))
-# For tanker car cost, we need to calculate how many tanker
-# cars the given demand would require, multiply by its purchase
-# cost, and then add the weekly traveling cost.  We'll spread the
-# one time purchase cost over weeks by dividing it by 48.
-roj.df$num_tanker_cars_needed <- 2 * roj.df$weekly_demand / 30
-# roj.df$tanker_car_weekly_purchase_cost <- 
-#     roj.df$num_tanker_cars_needed * 100000 / 48
-roj.df$tanker_car_weekly_travel_cost <- 36 *
-    0.5 * roj.df$num_tanker_cars_needed * roj.df$p_s_dist
-roj.df$tanker_car_weekly_hold_cost <- 10 *
-    0.5 * roj.df$num_tanker_cars_needed
+# roj.df$p_s_dist <- c(rep(317, 903),
+#                      rep(98, 301),
+#                      rep(140, 301),
+#                      rep(393, 602))
+# # For tanker car cost, we need to calculate how many tanker
+# # cars the given demand would require, multiply by its purchase
+# # cost, and then add the weekly traveling cost.  We'll spread the
+# # one time purchase cost over weeks by dividing it by 48.
+# roj.df$num_tanker_cars_needed <- 2 * roj.df$weekly_demand / 30
+# # roj.df$tanker_car_weekly_purchase_cost <- 
+# #     roj.df$num_tanker_cars_needed * 100000 / 48
+# roj.df$tanker_car_weekly_travel_cost <- 36 *
+#     0.5 * roj.df$num_tanker_cars_needed * roj.df$p_s_dist
+# roj.df$tanker_car_weekly_hold_cost <- 10 *
+#     0.5 * roj.df$num_tanker_cars_needed
 
-roj.df$g_p_weekly_cost <- 0.22 * roj.df$weekly_demand * roj.df$g_p_dist
-roj.df$storage_market_weekly_cost <- 1.2 * roj.df$weekly_demand *
-    roj.df$storage_dist
+# roj.df$g_p_weekly_cost <- 0.22 * roj.df$weekly_demand * roj.df$g_p_dist
+# roj.df$storage_market_weekly_cost <- 1.2 * roj.df$weekly_demand *
+#     roj.df$storage_dist
 
-# roj.df$weekly_storage_build <- 6000 * roj.df$weekly_demand / 48
-# roj.df$weekly_storage_maint <- (650 * roj.df$weekly_demand) / 48
-# roj.df$weekly_proc_build <- 8000 * roj.df$weekly_demand / 48
-# roj.df$weekly_proc_maint <- (2500 * roj.df$weekly_demand) / 48
+# # roj.df$weekly_storage_build <- 6000 * roj.df$weekly_demand / 48
+# # roj.df$weekly_storage_maint <- (650 * roj.df$weekly_demand) / 48
+# # roj.df$weekly_proc_build <- 8000 * roj.df$weekly_demand / 48
+# # roj.df$weekly_proc_maint <- (2500 * roj.df$weekly_demand) / 48
 
-# Reconstitution cost
-roj.df$reconstitution_cost <- 650 * roj.df$weekly_demand
+# # Reconstitution cost
+# roj.df$reconstitution_cost <- 650 * roj.df$weekly_demand
 
-# Add in raw material cost
-roj.df$raw_material_cost <- roj.df$weekly_demand * 2000 * c(
-    rep(mean.over.months[mean.over.months$grove == 'FLA', ]$mean_month,
-        4 * 301),
-    rep(mean.over.months[mean.over.months$grove == 'TEX', ]$mean_month,
-        301),
-    rep(mean.over.months[mean.over.months$grove == 'CAL', ]$mean_month,
-        2 * 301))
+# # Add in raw material cost
+# roj.df$raw_material_cost <- roj.df$weekly_demand * 2000 * c(
+#     rep(mean.over.months[mean.over.months$grove == 'FLA', ]$mean_month,
+#         4 * 301),
+#     rep(mean.over.months[mean.over.months$grove == 'TEX', ]$mean_month,
+#         301),
+#     rep(mean.over.months[mean.over.months$grove == 'CAL', ]$mean_month,
+#         2 * 301))
 
-# Also, add in manufacturing cost of FCOJ because we need to make
-# FCOJ to get ROJ (assume no futures).
-roj.df$manufacturing_cost <- 2000 * roj.df$weekly_demand
+# # Also, add in manufacturing cost of FCOJ because we need to make
+# # FCOJ to get ROJ (assume no futures).
+# roj.df$manufacturing_cost <- 2000 * roj.df$weekly_demand
 
-roj.df$profit <- roj.df$revenue - (
-    # roj.df$tanker_car_weekly_purchase_cost +
-    roj.df$tanker_car_weekly_travel_cost +
-    roj.df$tanker_car_weekly_hold_cost +
-    roj.df$g_p_weekly_cost +
-    roj.df$storage_market_weekly_cost +
-    roj.df$manufacturing_cost +
-    roj.df$reconstitution_cost +
-    # roj.df$weekly_proc_build +
-    # roj.df$weekly_proc_maint +
-    roj.df$raw_material_cost)
-# roj.df$profit <- roj.df$year1_profit + (
-#      roj.df$tanker_car_weekly_purchase_cost +
-#      roj.df$weekly_proc_build +
-#      roj.df$weekly_storage_build
-#      )
-ggplot(roj.df, aes(x=price, y=profit, colour=region)) +
-    # geom_line(aes(y=year1_profit), linetype='dotted') +
-    geom_line(aes(y=profit)) +
-    ggtitle('ROJ Profit')
-ggsave('profit_curves/roj_profit.png', width=10, height=6)
+# roj.df$profit <- roj.df$revenue - (
+#     # roj.df$tanker_car_weekly_purchase_cost +
+#     roj.df$tanker_car_weekly_travel_cost +
+#     roj.df$tanker_car_weekly_hold_cost +
+#     roj.df$g_p_weekly_cost +
+#     roj.df$storage_market_weekly_cost +
+#     roj.df$manufacturing_cost +
+#     roj.df$reconstitution_cost +
+#     # roj.df$weekly_proc_build +
+#     # roj.df$weekly_proc_maint +
+#     roj.df$raw_material_cost)
+# # roj.df$profit <- roj.df$year1_profit + (
+# #      roj.df$tanker_car_weekly_purchase_cost +
+# #      roj.df$weekly_proc_build +
+# #      roj.df$weekly_storage_build
+# #      )
+# ggplot(roj.df, aes(x=price, y=profit, colour=region)) +
+#     # geom_line(aes(y=year1_profit), linetype='dotted') +
+#     geom_line(aes(y=profit)) +
+#     ggtitle('ROJ Profit')
+# ggsave('profit_curves/roj_profit.png', width=10, height=6)
 
-roj.profit.max <- roj.df %>% group_by(region) %>%
-    filter(profit == max(profit))
-write.csv(roj.profit.max, file='profit_csvs/roj_max_profit.csv',
-          quote=FALSE, row.names=FALSE)
+# roj.profit.max <- roj.df %>% group_by(region) %>%
+#     filter(profit == max(profit))
+# write.csv(roj.profit.max, file='profit_csvs/roj_max_profit.csv',
+#           quote=FALSE, row.names=FALSE)
 
 
 # # FCOJ

@@ -1,12 +1,12 @@
-library(ggplot2)
-library(dplyr)
+suppressMessages(library(ggplot2))
+suppressMessages(library(dplyr))
 
 all.predicted.demands <- read.csv(
     'all_predicted_demands.csv',
     stringsAsFactors=FALSE)
 
 args <- commandArgs(trailingOnly = TRUE)
-FCOJ.FUTURE.PRICE <- as.float(args[1])
+FCOJ.FUTURE.PRICE <- as.numeric(args[1])
 
 # FCOJ
 fcoj.df <- all.predicted.demands[

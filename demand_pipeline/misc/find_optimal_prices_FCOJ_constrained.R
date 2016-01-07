@@ -1,5 +1,5 @@
-library(dplyr)
-library(ggplot2)
+suppressMessages(library(ggplot2))
+suppressMessages(library(dplyr))
 
 all.demands <- read.csv('all_predicted_demands.csv',
     stringsAsFactors=FALSE)
@@ -9,7 +9,7 @@ args <- commandArgs(trailingOnly = TRUE)
 ITER <- as.integer(args[1])
 NUM_FUTURES <- as.integer(args[2])
 WEEKS <- as.integer(args[3])
-FCOJ.FUTURE.PRICE <- as.float(args[4])
+FCOJ.FUTURE.PRICE <- as.numeric(args[4])
 
 fcoj.demands$weekly_revenue <- fcoj.demands$price *
     fcoj.demands$predicted_demand * 2000
