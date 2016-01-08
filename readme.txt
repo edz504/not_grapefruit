@@ -56,3 +56,15 @@ Pipeline
     adjust_prices.py
 7.  simulate.py (sanity check + fine tuning)
 8.  update_pricing_adjustments.py
+
+=====
+Steps
+=====
+1.  Copy new, blank decision sheet from /NotGrapefruit-Results into not_grapefruit/decisions
+2.  Open sheet, find 5-year future price and put it into update.sh (line 14)
+3.  Rename the sheet to notgrapefruit_20XX_init.xlsm
+4.  Run update.sh (year values should be updated from prev round)
+5.  Copy notgrapefruit_20XX_init.xlsm, rename copy to notgrapefruit_20XX.xlsm
+6.  Run adjust.sh
+7.  Copy notgrapefruit_20XX.xlsm into /NotGrapefruit
+8.  Increase year values in update.sh by 1
