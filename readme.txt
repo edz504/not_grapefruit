@@ -7,7 +7,7 @@ It uses a Python script to create a csv from all past data (MomPop, Practice Rou
 
 2.
 After the Python script has been run, we re-fit demand curves.  We consider all data, but use a local / neighborhood max-based filtering method to filter out possibly censored data.  We use the following model structure for each curve:
-
+    
 D(p) = a / (p ^ 2) + b
 
 

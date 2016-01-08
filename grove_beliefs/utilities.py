@@ -10,10 +10,12 @@ def get_spot_purchase_values(year):
         raise ValueError('Data only goes back to 2005')
     elif year < 2015:
         wb = Workbook(os.path.join(
-            ROOT_DIR, 'results/MomPop{0}.xlsm'.format(year)))
+            ROOT_DIR, 'results/MomPop{0}.xlsm'.format(year)),
+            app_visible=False)
     else:
         wb = Workbook(os.path.join(
-            ROOT_DIR, 'results/notgrapefruit{0}.xlsm'.format(year)))
+            ROOT_DIR, 'results/notgrapefruit{0}.xlsm'.format(year)),
+            app_visible=False)
 
     raw_price_df = pd.DataFrame(
         np.array(Range('grove', 'C5:N10', atleast_2d=True).value),
@@ -36,4 +38,5 @@ def get_spot_purchase_values(year):
     quantity_df = pd.DataFrame(quantity_mat_av,
                                index=Range('grove', 'B38:B43').value,
                                columns=Range('grove', 'C4:N4').value)
+    wb.close()
     return (raw_price_df, exchange_rate_df, quantity_df)

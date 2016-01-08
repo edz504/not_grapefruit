@@ -1,9 +1,11 @@
 #!/bin/sh
 cd "demand_pipeline"
 echo "Collecting new sales data..."
-# python CollectSalesDataAcrossYears.py
+python CollectSalesDataAcrossNewYear.py 2018
 echo "Updating demand curves..."
 Rscript demand_fit_plot.R 0
+echo "Updating grove beliefs..."
+python update_beliefs.py 2018
 echo "Creating demand tables..."
 Rscript create_demand_table.R
 echo "Optimizing ORA, POJ profits..."
