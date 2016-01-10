@@ -2,11 +2,14 @@ from xlwings import Workbook, Range
 import numpy as np
 import pandas as pd
 import os
+import sys
+
+latest_year = int(sys.argv[1])
 
 # directory setup
 ROOT_DIR = os.path.dirname(os.getcwd())
 
-YEARS = [2019]
+YEARS = list(xrange(2019, latest_year + 1))
 ORA_betas = [None] * len(YEARS)
 POJ_betas = [None] * len(YEARS)
 ROJ_betas = [None] * len(YEARS)

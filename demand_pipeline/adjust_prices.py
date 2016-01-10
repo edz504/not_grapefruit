@@ -3,8 +3,9 @@ import numpy as np
 import pandas as pd
 import os
 import shutil
+import sys
 
-YEAR = 2019
+YEAR = sys.argv[1]
 
 # directory setup
 ROOT_DIR = os.path.dirname(os.getcwd())
@@ -37,4 +38,5 @@ Range('pricing', 'D15:O21', atleast_2d=True).value = POJ_adjusted
 Range('pricing', 'D24:O30', atleast_2d=True).value = ROJ_adjusted
 Range('pricing', 'D33:O39', atleast_2d=True).value = FCOJ_adjusted
 
+wb.save()
 wb.close()

@@ -1,5 +1,6 @@
-FCOJ.FUTURE.PRICE <- 0.961788527
-FCOJ.FUTURES.MATURING <- 136000
+args <- commandArgs(trailingOnly = TRUE)
+FCOJ.FUTURE.PRICE <- as.numeric(args[1])
+FCOJ.FUTURES.MATURING <- as.integer(args[2])
 
 fcoj <- read.csv('profit_csvs/fcoj_futures_max_profit.csv')
 roj <- read.csv('profit_csvs/roj_futures_max_profit.csv')

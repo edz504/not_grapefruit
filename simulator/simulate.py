@@ -8,9 +8,8 @@ import subprocess
 import sys
 import time
 
-# input_file = sys.argv[1]
-# last_year_file = sys.argv[2]
-
+# this_year = sys.argv[1]
+this_year = 2019
 # Hard-code the file to use.  Note that we can use both the
 # results .xlsm and the original decisions spreadsheet, because
 # the results .xlsm contains the decision sheets.
@@ -24,12 +23,12 @@ ROOT_DIR = os.path.dirname(os.getcwd())
 #     input_file = os.path.join(ROOT_DIR,
 #         'decisions/notgrapefruit2019_5test_tweak.xlsx')
 input_file = os.path.join(ROOT_DIR,
-    'decisions/notgrapefruit2019.xlsm')
+    'decisions/notgrapefruit{0}.xlsm'.format(this_year))
 
 # We also need the Results file of the previous year in order to
 # initialize the inventory.
 last_year_file = os.path.join(ROOT_DIR,
-    'results/notgrapefruit2018.xlsm')
+    'results/notgrapefruit{0}.xlsm'.format(int(this_year) - 1))
 
 # Hard-code for 4/5 experiment, assume we start with 0 inv
 # initial_inventory = {

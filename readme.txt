@@ -60,11 +60,24 @@ Pipeline
 =====
 Steps
 =====
+** Make sure venv oj is on **
 1.  Copy new, blank decision sheet from /NotGrapefruit-Results into not_grapefruit/decisions
-2.  Open sheet, find 5-year future price and put it into update.sh (line 14)
+2.  Open sheet, find 5-year future price and put it into update.sh
+    N41 => line 21
+    whatever cell has the price that we're paying this year ==> line 24
+    P36 ==> line 24
 3.  Rename the sheet to notgrapefruit_20XX_init.xlsm
 4.  Run update.sh (year values should be updated from prev round)
-5.  Copy notgrapefruit_20XX_init.xlsm, rename copy to notgrapefruit_20XX.xlsm
+5.  Copy notgrapefruit_20XX_init.xlsm, rename copy to notgrapefruit_20XX.xlsm, and open the new file
 6.  Run adjust.sh
-7.  Copy notgrapefruit_20XX.xlsm into /NotGrapefruit
-8.  Increase year values in update.sh by 1
+7.  Sanity check, run "python simulate.py <year>"
+8.  Make necessary tweaks to notgrapefruit_20XX.xlsm
+9.  Copy notgrapefruit_20XX.xlsm into /NotGrapefruit
+-- Done --
+10.  Increase year values in update.sh, adjust.sh 1 (for next year's pipeline)
+     line 4 (update.sh)      20XX
+     line 11 (update.sh)     20XX
+     line 27 (update.sh)     20XX + 1
+     line 4 (adjust.sh)      20XX + 1
+     line 6 (adjust.sh)      20XX + 1
+11.  python update_pricing_adjustments.py 20XX

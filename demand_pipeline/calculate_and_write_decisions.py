@@ -2,6 +2,9 @@ from xlwings import Workbook, Range
 import numpy as np
 import pandas as pd
 import os
+import sys
+
+YEAR = sys.argv[1]
 
 # directory setup
 ROOT_DIR = os.path.dirname(os.getcwd())
@@ -9,7 +12,7 @@ ROOT_DIR = os.path.dirname(os.getcwd())
 # Set up workbook to write to.
 wb = Workbook(
     os.path.join(ROOT_DIR,
-                 'decisions/notgrapefruit2019_init.xlsm'),
+                 'decisions/notgrapefruit{0}_init.xlsm'.format(YEAR)),
               app_visible=False)
 
 
