@@ -14,7 +14,7 @@ all_raw_price_df = pd.DataFrame(
 all_exchange_rate_df = pd.DataFrame(
     columns=['foreign', 'month', 'rate', 'year'])
 all_quantity_df = pd.DataFrame(
-    columns=['grove', 'month', 'average_weekly_quantity', 'year'])
+    columns=['grove', 'month', 'quantity', 'year'])
 for year in YEARS:
     raw_price_df, exchange_rate_df, quantity_df = get_spot_purchase_values(year)
     raw_price_leveled = raw_price_df.unstack().reorder_levels(
@@ -22,20 +22,25 @@ for year in YEARS:
     raw_price_leveled.columns = ['grove', 'month', 'price']
     raw_price_leveled['year'] = year
     all_raw_price_df = pd.concat((all_raw_price_df, raw_price_leveled))
-
     exchange_rate_leveled = exchange_rate_df.unstack().reorder_levels(
         [1, 0]).reset_index()
     exchange_rate_leveled.columns = ['foreign', 'month', 'rate']
     exchange_rate_leveled['year'] = year
     all_exchange_rate_df = pd.concat((all_exchange_rate_df,
                                       exchange_rate_leveled))
-
     quantity_leveled = quantity_df.unstack().reorder_levels(
         [1, 0]).reset_index()
     quantity_leveled.columns = ['grove', 'month', 'quantity']
     quantity_leveled['year'] = year
     all_quantity_df = pd.concat((all_quantity_df,
                                  quantity_leveled))
+
+all_raw_price_df.to_csv('all_raw_price_df.csv',
+    index=False)
+all_exchange_rate_df.to_csv('all_exchange_rate_df.csv',
+    index=False)
+all_quantity_df.to_csv('all_quantity_df.csv',
+    index=False)
 
 raw_price_beliefs_mean = all_raw_price_df.groupby(
     ['grove', 'month'])['price'].mean().reorder_levels(

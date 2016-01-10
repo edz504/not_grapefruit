@@ -80,4 +80,4 @@ Steps
      line 27 (update.sh)     20XX + 1
      line 4 (adjust.sh)      20XX + 1
      line 6 (adjust.sh)      20XX + 1
-11.  python update_pricing_adjustments.py 20XX
+11.  (cd demand_pipeline), python update_pricing_adjustments.py 20XX

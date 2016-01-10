@@ -6,9 +6,9 @@ python CollectSalesDataAcrossNewYear.py 2019
 echo "Updating demand curves..."
 Rscript demand_fit_plot.R 0
 
-# echo "Updating grove beliefs..."
-# cd "../grove_beliefs"
-# python update_beliefs.py 2018
+echo "Updating grove beliefs..."
+cd "../grove_beliefs"
+python update_beliefs.py 2019
 
 echo "Creating demand tables..."
 cd "../demand_pipeline"
