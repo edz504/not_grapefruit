@@ -61,8 +61,9 @@ Pipeline
 Steps
 =====
 ** Make sure venv oj is on **
-1.  Copy new, blank decision sheet from /NotGrapefruit-Results into not_grapefruit/decisions
-2.  Open sheet, find 5-year future price and put it into update.sh
+1.  Copy new, blank decision sheet from /NotGrapefruit into not_grapefruit/decisions AND
+    results sheet from /NotGrapefruit into not_grapefruit/results
+2.  Open decision sheet, find 5-year future price and put it into update.sh
     N41 => line 21
     whatever cell has the price that we're paying this year ==> line 24
     P36 ==> line 24
